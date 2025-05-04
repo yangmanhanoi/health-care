@@ -5,6 +5,15 @@ from .serializers import DoctorSerializer
 from .models import Doctor
 import json
 
+@api_view(['GET'])
+def get_doctor(request, doctor_id):
+    try:
+        doctor = Doctor.objects.get(user_id=doctor_id)
+    except Doctor.DoesNotExist:
+        return Response({"message": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = DoctorSerializer(doctor)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 # Create your views here.
 @api_view(['POST'])
 def create_doctor(request):
