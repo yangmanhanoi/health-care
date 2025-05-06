@@ -9,7 +9,7 @@ router = Blueprint("router", __name__)
 @router.route('/<service_prefix>/<path:path>', methods = ['POST', 'GET', 'PUT', 'DELETE'])
 @authenticate()
 def forward_to_service(service_prefix, path):
-    user = request.user  # Đã xác thực xong, lấy thông tin user
+    
     token = request.headers.get('Authorization')
 
     # Kiểm tra xem service_prefix có hợp lệ không
@@ -19,10 +19,14 @@ def forward_to_service(service_prefix, path):
     
     # Xây dựng headers để forward
     headers = {
-        'Authorization': token,
-        'X-User-Roles': json.dumps(user['roles']) ,
-        'X-User-Id': str(user['user_id'])
+        'Authorization': token
     }
+
+    if hasattr(request, 'user'):
+        user = request.user  # Đã xác thực xong, lấy thông tin user
+        headers['X-User-Roles'] = json.dumps(user['roles'])
+        headers['X-User-Id'] = str(user['user_id'])
+    
 
     # Lấy dữ liệu từ request
     data = request.json if request.method in ['POST', 'PUT'] else None
@@ -41,4 +45,7 @@ def forward_to_service(service_prefix, path):
         response = requests.delete(service_request_url, headers=headers)
 
     # Trả lại phản hồi từ service cho client
-    return jsonify(response.json()), response.status_code
+    if response.content:
+        return jsonify(response.json()), response.status_code
+    else:
+        return '', response.status_code
