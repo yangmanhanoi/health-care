@@ -1,0 +1,5 @@
+Django
+mysqlclient>=2.2.0
+djangorestframework
+djangorestframework-simplejwt
+requests

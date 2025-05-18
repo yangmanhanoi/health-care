@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  service-auth:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile.dev
+    container_name: service-auth
+    depends_on:
+      - mysql
+    ports:
+      - "8001:8001"
+    networks:
+      - healthcare_net
+  service-doctor:
+    build:
+      context: ./doctor_service
+      dockerfile: Dockerfile.dev
+    container_name: service-doctor
+    depends_on:
+      - mysql
+    ports:
+      - "8002:8002"
+    networks:
+      - healthcare_net
+  service-appointment:
+    build:
+      context: ./appointment_service
+      dockerfile: Dockerfile.dev
+    container_name: service-appointment
+    depends_on:
+      - mysql
+    ports:
+      - "8003:8003"
+    networks:
+      - healthcare_net
+  # service-chatbot:
+  #   build:
+  #     context: ./chatbot_service
+  #     dockerfile: Dockerfile
+  #   container_name: service-chatbot
+  #   depends_on:
+  #     - mysql
+  #   ports:
+  #     - "8004:8004"
+  #   networks:
+  #     - healthcare_net
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      - service-auth
+      - service-doctor
+      - service-appointment
+      # - service-chatbot
+    ports:
+      - "8080:8080"
+    networks:
+      - healthcare_net
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: healthcare_sys
+      MYSQL_USER: namdt25
+      MYSQL_PASSWORD: namdt25
+    ports:
+      - "3306:3306"
+    volumes:
+      - healthcare_mysql_data:/var/lib/mysql
+    networks:
+      - healthcare_net
+
+volumes:
+  healthcare_mysql_data:
+    driver: local
+networks:
+  healthcare_net:
+    driver: bridge
