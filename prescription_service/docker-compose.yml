@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  prescription-service:
+    build: .
+    ports:
+      - "8005:8000"  # Assuming port 8005 for prescription service
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=prescription_service.settings
+      # Override database connection settings for Docker
+      - MYSQL_DATABASE=prescription_db
+      - MYSQL_USER=namdt25
+      - MYSQL_PASSWORD=namdt25
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+    volumes:
+      - .:/app
+    restart: always
+    # Using entrypoint script from Dockerfile
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"  # Changed to 3307 to avoid conflicts with host MySQL
+    environment:
+      - MYSQL_DATABASE=prescription_db
+      - MYSQL_USER=namdt25
+      - MYSQL_PASSWORD=namdt25
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ALLOW_EMPTY_PASSWORD=no
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mysql_data:
