@@ -1,0 +1,31 @@
+# Sử dụng image Python chính thức làm base
+FROM python:3.11-slim
+
+# Thiết lập biến môi trường để Python không tạo cache file .pyc và chạy output ngay
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Tạo thư mục làm việc trong container
+WORKDIR /app
+
+# Cài đặt các package hệ thống cần thiết (nếu có)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
+# Copy file requirements.txt vào container
+COPY requirements.txt /app/
+
+# Cài đặt dependencies Python
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Copy toàn bộ source code vào container
+COPY . /app/
+
+# Expose port 8000 (mặc định Django chạy trên port này)
+EXPOSE 8001
+
+# Lệnh chạy Django server (bạn có thể thay đổi hoặc chuyển sang dùng gunicorn)
+CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8001", "--workers", "4"]

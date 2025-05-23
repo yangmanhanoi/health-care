@@ -1,9 +1,19 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Appointment
+from .models import Appointment, AppointmentStatus
 from .serializers import AppointmentSerializer
 from core.utils.request_utils import extract_user_info_from_headers
+ACTION_MAP = {
+    "confirm": {"status": AppointmentStatus.CONFIRMED, "roles": ["staff"]},
+    "deny": {"status": AppointmentStatus.DENIED, "roles": ["staff"]},
+    "cancel_request": {"status": AppointmentStatus.REJECTION_REQUESTED, "roles": ["patient"]},
+    "cancel_accept": {"status": AppointmentStatus.CANCELED, "roles": ["staff"]},
+    "cancel_reject": {"status": AppointmentStatus.REJECTED, "roles": ["staff"]},
+    "exchange_request": {"status": AppointmentStatus.EXCHANGE_REQUESTED, "roles": ["patient"]},
+    "finish": {"status": AppointmentStatus.FINISHED, "roles": ["staff"]},
+    "invoice": {"status": AppointmentStatus.INVOICED, "roles": ["staff"]},
+}
 # Create your views here.
 @api_view(['GET', 'POST'])
 def patient_appointment_list_create(request):

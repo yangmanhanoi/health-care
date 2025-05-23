@@ -9,7 +9,7 @@ from .models import User, Role
 from django.contrib.auth.hashers import make_password
 import requests
 
-DOCTOR_SERVICE_URL = 'http://localhost:8002/api/info'
+DOCTOR_SERVICE_URL = 'http://svc-doctor/api/info'
 # Create your views here.
 class LoginView(APIView):
     def post(self, request):
