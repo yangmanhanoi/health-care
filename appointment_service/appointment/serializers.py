@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import datetime, time
 import requests
 from django.core.exceptions import ValidationError
-DOCTOR_SERVICE_URL = "http://localhost:8002/api/"
+DOCTOR_SERVICE_URL = "http://svc-doctor/api/"
 class AppointmentSerializer(serializers.ModelSerializer):
     doctor_id = serializers.CharField(max_length=255)  # or UUIDField depending on your ID type
     patient_id = serializers.CharField(max_length=255)  # or UUIDField depending on your ID type
