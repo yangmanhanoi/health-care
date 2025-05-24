@@ -25,7 +25,13 @@ SECRET_KEY = 'django-insecure-4a&x1!*-y6$vglx$z4b$fs&+etngop*m%r2s*mfj#q+q5=qw!-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'service-auth',
+    'api-gateway',
+    '*'  # Allow all hosts for development (remove in production)
+]
 
 
 # Application definition
@@ -89,7 +95,7 @@ DATABASES = {
         'NAME': 'healthcare_sys',
         'USER': 'namdt25',
         'PASSWORD': 'namdt25',
-        'HOST': '127.0.0.1',
+        'HOST': 'mysql_db',
         'PORT': '3306'
     }
 }

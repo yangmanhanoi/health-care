@@ -4,6 +4,16 @@ from rest_framework.response import Response
 from .models import Appointment, AppointmentStatus
 from .serializers import AppointmentSerializer
 from core.utils.request_utils import extract_user_info_from_headers
+ACTION_MAP = {
+    "confirm": {"status": AppointmentStatus.CONFIRMED, "roles": ["staff"]},
+    "deny": {"status": AppointmentStatus.DENIED, "roles": ["staff"]},
+    "cancel_request": {"status": AppointmentStatus.REJECTION_REQUESTED, "roles": ["patient"]},
+    "cancel_accept": {"status": AppointmentStatus.CANCELED, "roles": ["staff"]},
+    "cancel_reject": {"status": AppointmentStatus.REJECTED, "roles": ["staff"]},
+    "exchange_request": {"status": AppointmentStatus.EXCHANGE_REQUESTED, "roles": ["patient"]},
+    "finish": {"status": AppointmentStatus.FINISHED, "roles": ["staff"]},
+    "invoice": {"status": AppointmentStatus.INVOICED, "roles": ["staff"]},
+}
 # Create your views here.
 @api_view(['GET', 'POST'])
 def patient_appointment_list_create(request):
@@ -135,6 +145,51 @@ def diagnose_appointment(request, appointment_id):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['PUT'])
+def complete_lab_test(request, appointment_id):
+    """
+    Update appointment status from TESTING to CONCLUDING after lab test completion
+    """
+    user_id, roles, error_response = extract_user_info_from_headers(request)
+    if error_response:
+        return error_response
+
+    # Check if user is a doctor
+    if 'DOCTOR' not in roles:
+        return Response(
+            {"message": "Only doctors can complete lab tests"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    try:
+        appointment = Appointment.objects.get(id=appointment_id)
+    except Appointment.DoesNotExist:
+        return Response(
+            {"message": "Appointment not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Check if the doctor is the one assigned to this appointment
+    if str(user_id) != str(appointment.doctor_id):
+        return Response(
+            {"message": "You can only complete lab tests for your own appointments"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    # Check if appointment is in TESTING status
+    if appointment.status != AppointmentStatus.TESTING:
+        return Response(
+            {"message": f"Cannot complete lab test for appointment with status {appointment.status}. Appointment must be in TESTING status."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Update appointment status to CONCLUDING
+    appointment.status = AppointmentStatus.CONCLUDING
+    appointment.save()
+
+    serializer = AppointmentSerializer(appointment)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
 def conclude_appointment(request, appointment_id):
     """
     Update appointment conclusion field and change status to FINISHED
@@ -166,9 +221,9 @@ def conclude_appointment(request, appointment_id):
         )
 
     # Check if appointment is in a valid state to be concluded
-    if appointment.status not in [AppointmentStatus.TESTING, AppointmentStatus.CONCLUDING]:
+    if appointment.status != AppointmentStatus.CONCLUDING:
         return Response(
-            {"message": f"Cannot conclude appointment with status {appointment.status}"},
+            {"message": f"Cannot conclude appointment with status {appointment.status}. Appointment must be in CONCLUDING status."},
             status=status.HTTP_400_BAD_REQUEST
         )
 

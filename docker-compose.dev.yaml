@@ -1,0 +1,108 @@
+version: "3.8"
+
+services:
+  service-auth:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile.dev
+    container_name: service-auth
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+    networks:
+      - healthcare_net
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
+  service-doctor:
+    build:
+      context: ./doctor_service
+      dockerfile: Dockerfile.dev
+    container_name: service-doctor
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8002:8002"
+    networks:
+      - healthcare_net
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8002"
+  service-appointment:
+    build:
+      context: ./appointment_service
+      dockerfile: Dockerfile.dev
+    container_name: service-appointment
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8003:8003"
+    networks:
+      - healthcare_net
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8003"
+  # service-chatbot:
+  #   build:
+  #     context: ./chatbot_service
+  #     dockerfile: Dockerfile
+  #   container_name: service-chatbot
+  #   depends_on:
+  #     - mysql
+  #   ports:
+  #     - "8004:8004"
+  #   networks:
+  #     - healthcare_net
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      service-auth:
+        condition: service_started
+      service-doctor:
+        condition: service_started
+      service-appointment:
+        condition: service_started
+      # - service-chatbot
+    ports:
+      - "8080:8080"
+    networks:
+      - healthcare_net
+    command: sh -c "sleep 10 && python main.py"
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: healthcare_sys
+      MYSQL_USER: namdt25
+      MYSQL_PASSWORD: namdt25
+    ports:
+      - "3306:3306"
+    volumes:
+      - healthcare_mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - healthcare_net
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+volumes:
+  healthcare_mysql_data:
+    driver: local
+networks:
+  healthcare_net:
+    driver: bridge
