@@ -1,0 +1,37 @@
+# Sử dụng image Python chính thức làm base
+FROM python:3.11-slim
+
+# Thiết lập biến môi trường để Python không tạo cache file .pyc và chạy output ngay
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Tạo thư mục làm việc trong container
+WORKDIR /app
+
+# Cài đặt các package hệ thống cần thiết (nếu có)
+# Cài dependencies cần thiết cho mysqlclient
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy file requirements.txt vào container
+COPY requirements.txt /app/
+
+# Cài đặt dependencies Python
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Copy toàn bộ source code vào container
+COPY . /app/
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Expose port 8001 (patient service port)
+EXPOSE 8001
+
+# Lệnh chạy Django server với gunicorn cho production
+CMD ["gunicorn", "--bind", "0.0.0.0:8001", "patient_service.wsgi:application"]

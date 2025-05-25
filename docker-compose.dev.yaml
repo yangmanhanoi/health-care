@@ -40,6 +40,19 @@ services:
     networks:
       - healthcare_net
     command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8003"
+  service-patient:
+    build:
+      context: ./patient_service
+      dockerfile: Dockerfile.dev
+    container_name: service-patient
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8004:8004"
+    networks:
+      - healthcare_net
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8004"
   # service-chatbot:
   #   build:
   #     context: ./chatbot_service
@@ -60,6 +73,8 @@ services:
       service-doctor:
         condition: service_started
       service-appointment:
+        condition: service_started
+      service-patient:
         condition: service_started
       # - service-chatbot
     ports:
