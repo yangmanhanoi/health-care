@@ -10,6 +10,7 @@ from django.contrib.auth.hashers import make_password
 import requests
 
 DOCTOR_SERVICE_URL = 'http://service-doctor:8002/api/info'
+PATIENT_SERVICE_URL = 'http://service-patient:8004/api/patients'
 # Create your views here.
 class LoginView(APIView):
     def post(self, request):
@@ -18,13 +19,31 @@ class LoginView(APIView):
             return Response(serializer.validated_data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class RegisterCustomerView(CreateAPIView):
+class RegisterPatientView(CreateAPIView):
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+
+            # Call patient_service to create patient record
+            try:
+                patient_payload = {
+                    "user_id": user.id,
+                    "email": request.data.get("email", ""),
+                    "full_name": request.data.get("full_name", ""),
+                    "phone": request.data.get("phone", ""),
+                    "dob": request.data.get("dob", "1990-01-01"),
+                    "gender": request.data.get("gender", "O"),
+                    "address": request.data.get("address", "")
+                }
+                response = requests.post(f"{PATIENT_SERVICE_URL}/auth/register", json=patient_payload, timeout=5)
+                response.raise_for_status()
+            except Exception as e:
+                print("Error contacting patient_service:", e)
+                # Continue even if patient service call fails
+
             return Response({
                 "message": "User registered successfully",
                 "user": {
