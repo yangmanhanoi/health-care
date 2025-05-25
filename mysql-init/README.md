@@ -14,6 +14,7 @@ This directory contains MySQL initialization scripts that are automatically exec
   - `appointment_db` - for appointment_service
   - `patient_db` - for patient_service
   - `chatbot_db` - for chatbot_service
+  - `prescription_db` - for prescription_service
 
 ### 02-default-data.sql
 
@@ -36,6 +37,9 @@ Each microservice is configured to use its own database:
 - **Appointment Service**: `appointment_db`
 - **Patient Service**: `patient_db`
 - **Chatbot Service**: `chatbot_db`
+- **Prescription Service**: `prescription_db`
+
+**Note**: Laboratory and Pharmacy services use PostgreSQL databases (`laboratory_db` and `pharmacy_db`).
 
 ## User Permissions
 

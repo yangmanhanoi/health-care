@@ -37,8 +37,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('confirm_password')
         user = User.objects.create_user(**validated_data)
 
-        # Gán role customer mặc định
-        customer_role = Role.objects.get(name="customer")
-        user.roles.add(customer_role)
+        # Gán role PATIENT mặc định
+        patient_role = Role.objects.get(name="PATIENT")
+        user.roles.add(patient_role)
         user.save()
         return user

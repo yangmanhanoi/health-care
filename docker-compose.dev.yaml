@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   service-auth:
     build:
@@ -40,6 +38,79 @@ services:
     networks:
       - healthcare_net
     command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8003"
+  service-patient:
+    build:
+      context: ./patient_service
+      dockerfile: Dockerfile.dev
+    container_name: service-patient
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8004:8004"
+    networks:
+      - healthcare_net
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8004"
+  service-laboratory:
+    build:
+      context: ./laboratory_service
+      dockerfile: Dockerfile
+    container_name: service-laboratory
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8005:8000"
+    networks:
+      - healthcare_net
+    environment:
+      - POSTGRES_DB=laboratory_db
+      - POSTGRES_USER=namdt25
+      - POSTGRES_PASSWORD=namdt25
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+  service-prescription:
+    build:
+      context: ./prescription_service
+      dockerfile: Dockerfile
+    container_name: service-prescription
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8006:8000"
+    networks:
+      - healthcare_net
+    environment:
+      - MYSQL_DATABASE=prescription_db
+      - MYSQL_USER=namdt25
+      - MYSQL_PASSWORD=namdt25
+      - MYSQL_HOST=mysql_db
+      - MYSQL_PORT=3306
+    command: sh -c "sleep 10 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+  service-pharmacy:
+    build:
+      context: ./pharmacy_service
+      dockerfile: dockerfile
+    container_name: service-pharmacy
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8007:8000"
+    networks:
+      - healthcare_net
+    environment:
+      - POSTGRES_DB=pharmacy_db
+      - POSTGRES_USER=namdt25
+      - POSTGRES_PASSWORD=namdt25
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
   # service-chatbot:
   #   build:
   #     context: ./chatbot_service
@@ -61,12 +132,21 @@ services:
         condition: service_started
       service-appointment:
         condition: service_started
-      # - service-chatbot
+      service-patient:
+        condition: service_started
+      service-laboratory:
+        condition: service_started
+      service-prescription:
+        condition: service_started
+      service-pharmacy:
+        condition: service_started
+      # service-chatbot:
+      #   condition: service_started
     ports:
       - "8080:8080"
     networks:
       - healthcare_net
-    command: sh -c "sleep 10 && python main.py"
+    command: sh -c "sleep 15 && python main.py"
   mysql:
     image: mysql:8.0
     container_name: mysql_db
@@ -100,8 +180,32 @@ services:
       interval: 10s
       start_period: 40s
 
+  postgres:
+    image: postgres:14
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: namdt25
+      POSTGRES_PASSWORD: namdt25
+    ports:
+      - "5432:5432"
+    volumes:
+      - healthcare_postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - healthcare_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U namdt25"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
 volumes:
   healthcare_mysql_data:
+    driver: local
+  healthcare_postgres_data:
     driver: local
 networks:
   healthcare_net:
