@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
-from .models import Prescription, PrescriptionItem, PrescriptionStatus
+from .models import Prescription, PrescriptionStatus
 from .serializers import PrescriptionSerializer, PrescriptionItemSerializer, PrescriptionStatusUpdateSerializer
 from core.utils.request_utils import extract_user_info_from_headers
 import requests
@@ -15,86 +15,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Constants for service URLs
-DOCTOR_SERVICE_URL = "http://localhost:8002/api/info"
-PHARMACY_SERVICE_URL = "http://localhost:8004/api/medications"  # Assuming port 8004 for pharmacy service
-
-@api_view(['POST'])
-@authentication_classes([])  # No authentication required
-@permission_classes([])      # No permissions required
-def create_prescription_direct(request):
-    """
-    Create a new prescription directly without using serializers
-    This is a simplified version to help diagnose issues
-    """
-    try:
-        # Extract user info from headers
-        user_id, roles, error_response = extract_user_info_from_headers(request)
-        if error_response:
-            return error_response
-
-        # Only doctors can create prescriptions
-        if 'DOCTOR' not in roles:
-            return Response({"message": "Only doctors can create prescriptions"},
-                            status=status.HTTP_403_FORBIDDEN)
-
-        # Get data from request
-        data = request.data
-        logger.info(f"Received data: {data}")
-
-        # Validate required fields
-        if 'patient_id' not in data:
-            return Response({"message": "patient_id is required"},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        # Create prescription
-        prescription = Prescription.objects.create(
-            patient_id=data['patient_id'],
-            doctor_id=user_id,
-            diagnose=data.get('diagnose', ''),
-            status='ACTIVE'
-        )
-        logger.info(f"Created prescription with ID: {prescription.id}")
-
-        # Create prescription items
-        items_data = data.get('items', [])
-        for item_data in items_data:
-            # Validate required fields for items
-            required_fields = ['medication_id', 'medication_name', 'quantity',
-                              'dosage', 'frequency', 'duration', 'route']
-
-            missing_fields = [field for field in required_fields if field not in item_data]
-            if missing_fields:
-                # Delete the prescription if validation fails
-                prescription.delete()
-                return Response(
-                    {"message": f"Missing required fields for prescription item: {', '.join(missing_fields)}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # Create the prescription item
-            item = PrescriptionItem.objects.create(
-                prescription=prescription,
-                medication_id=item_data['medication_id'],
-                medication_name=item_data['medication_name'],
-                quantity=item_data['quantity'],
-                dosage=item_data['dosage'],
-                frequency=item_data['frequency'],
-                duration=item_data['duration'],
-                route=item_data['route'],
-                note=item_data.get('note', '')
-            )
-            logger.info(f"Created prescription item: {item.id} - {item.medication_name}")
-
-        # Return the created prescription
-        serializer = PrescriptionSerializer(prescription)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        logger.error(f"Error creating prescription: {str(e)}")
-        return Response(
-            {"message": f"Error creating prescription: {str(e)}"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+DOCTOR_SERVICE_URL = "http://service-doctor:8002/api/info"
+PHARMACY_SERVICE_URL = "http://service-pharmacy:8000/api/pharmacy"  # Using service name from docker-compose
 
 @api_view(['GET'])
 @authentication_classes([])  # No authentication required
@@ -118,7 +40,7 @@ def search_medications(request):
     # Call pharmacy service to get the list of medications
     try:
         # First, fetch all medications from the pharmacy service
-        response = requests.get(f"{PHARMACY_SERVICE_URL}")
+        response = requests.get(f"{PHARMACY_SERVICE_URL}/medicines/")
 
         if response.status_code != 200:
             return Response(
@@ -181,7 +103,7 @@ def health_check(request):
         "version": "1.0.0"
     })
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes([])  # No authentication required
 @permission_classes([])      # No permissions required
 def prescription_list_create(request):

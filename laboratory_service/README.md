@@ -33,6 +33,9 @@ This microservice is part of the healthcare management system and handles the ma
 - `GET /api/doctor/<id>/` - Get all lab test orders by a doctor
 - `PUT /api/<id>/status/` - Update lab test order status
 
+### Appointment Integration
+- `GET /api/appointment/<appointment_id>/test-items/` - Get all test items for a specific appointment with pricing information
+
 ### Test Result Management
 - `POST /api/results/upload/<order_item_id>/` - Upload a test result for a specific test (lab technicians only)
 - `PUT /api/results/<id>/` - Update an existing test result (lab technicians only)

@@ -23,14 +23,15 @@ class TestResultSerializer(serializers.ModelSerializer):
 class LabTestOrderItemSerializer(serializers.ModelSerializer):
     test_type_details = TestTypeSerializer(source='test_type', read_only=True)
     result_details = TestResultSerializer(source='result', read_only=True)
+    price = serializers.ReadOnlyField()  # Include the price property
 
     class Meta:
         model = LabTestOrderItem
         fields = [
             'id', 'order', 'test_type', 'test_type_details',
-            'status', 'result_details', 'created_at', 'updated_at'
+            'status', 'price', 'result_details', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'price', 'created_at', 'updated_at']
         extra_kwargs = {
             'order': {'required': False}  # Make order field not required during validation
         }
@@ -41,7 +42,7 @@ class LabTestOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestOrder
         fields = [
-            'id', 'patient_id', 'doctor_id', 'request_date',
+            'id', 'patient_id', 'doctor_id', 'appointment_id', 'request_date',
             'status', 'clinical_notes', 'urgency', 'collection_date',
             'completion_date', 'items', 'created_at', 'updated_at'
         ]
@@ -112,3 +113,12 @@ class LabTestOrderItemStatusUpdateSerializer(serializers.ModelSerializer):
         if value not in [choice[0] for choice in LabTestOrderStatus.choices]:
             raise serializers.ValidationError(f"Invalid status. Must be one of: {', '.join([choice[0] for choice in LabTestOrderStatus.choices])}")
         return value
+
+class AppointmentTestItemsSerializer(serializers.Serializer):
+    """
+    Serializer for appointment test items response with pricing information
+    """
+    appointment_id = serializers.IntegerField()
+    total_test_items = serializers.IntegerField()
+    total_cost = serializers.DecimalField(max_digits=10, decimal_places=2)
+    test_items = LabTestOrderItemSerializer(many=True)

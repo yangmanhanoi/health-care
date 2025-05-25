@@ -374,6 +374,63 @@ def upload_test_result(request, order_item_id):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(['GET'])
+@authentication_classes([])  # No authentication required
+@permission_classes([])      # No permissions required
+def appointment_test_items(request, appointment_id):
+    """
+    Get all test items for a specific appointment with pricing information
+    """
+    user_id, roles, error_response = extract_user_info_from_headers(request)
+    if error_response:
+        return error_response
+
+    try:
+        # Get all lab test orders for this appointment
+        lab_test_orders = LabTestOrder.objects.filter(appointment_id=appointment_id)
+
+        if not lab_test_orders.exists():
+            return Response({
+                "message": "No lab test orders found for this appointment",
+                "appointment_id": appointment_id,
+                "test_items": []
+            }, status=status.HTTP_200_OK)
+
+        # Check permissions - users can only view their own appointment test items
+        first_order = lab_test_orders.first()
+        if not ('ADMIN' in roles or 'LAB_TECHNICIAN' in roles or
+                ('DOCTOR' in roles and first_order.doctor_id == user_id) or
+                (('PATIENT' in roles or 'CUSTOMER' in roles) and first_order.patient_id == user_id)):
+            return Response({"message": "You don't have permission to view these test items"},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        # Collect all test items from all orders for this appointment
+        all_test_items = []
+        total_cost = 0
+
+        for order in lab_test_orders:
+            for item in order.items.all():
+                all_test_items.append(item)
+                total_cost += item.price
+
+        # Serialize the test items
+        serializer = LabTestOrderItemSerializer(all_test_items, many=True)
+
+        return Response({
+            "appointment_id": appointment_id,
+            "total_test_items": len(all_test_items),
+            "total_cost": total_cost,
+            "test_items": serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error retrieving test items for appointment {appointment_id}: {str(e)}")
+        return Response(
+            {"message": "An error occurred while retrieving test items"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 @api_view(['PUT'])
 @authentication_classes([])  # No authentication required
 @permission_classes([])      # No permissions required

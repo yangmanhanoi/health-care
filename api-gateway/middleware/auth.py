@@ -18,6 +18,8 @@ WHITELIST_PATHS = [
     ('svc-auth', 'api/register'),
     ('svc-doctor', 'get-doctor-info'),
     ('svc-appointment', 'get-appointment-info')
+    ('svc-laboratory', 'api/testtypes'),
+    ('svc-laboratory', 'api/')
 ]
 def is_whitelisted(method, path):
     for entry in WHITELIST_PATHS:

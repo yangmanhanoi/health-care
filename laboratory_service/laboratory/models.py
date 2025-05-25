@@ -28,6 +28,7 @@ class LabTestOrder(models.Model):
     """
     patient_id = models.IntegerField()
     doctor_id = models.IntegerField()
+    appointment_id = models.IntegerField(blank=True, null=True)  # Link to appointment
     request_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=20,
@@ -65,6 +66,11 @@ class LabTestOrderItem(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def price(self):
+        """Return the price of the test type"""
+        return self.test_type.cost
 
     def __str__(self):
         return f"{self.test_type.name} for Order {self.order.id}"

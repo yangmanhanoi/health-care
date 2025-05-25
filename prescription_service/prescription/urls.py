@@ -8,8 +8,6 @@ urlpatterns = [
     # List all prescriptions or create a new one
     path('', views.prescription_list_create, name='prescription-list-create'),
 
-    # Direct prescription creation (simplified version)
-    path('create/', views.create_prescription_direct, name='create-prescription-direct'),
 
     # Retrieve, update or delete a prescription
     path('<int:pk>/', views.prescription_detail, name='prescription-detail'),
