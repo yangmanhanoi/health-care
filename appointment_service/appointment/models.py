@@ -24,6 +24,7 @@ class Appointment(models.Model):
     date = models.DateField()
     time = models.CharField(max_length=5)  # Format: HH:MM
     status = models.CharField(max_length=50, choices=AppointmentStatus.choices, default=AppointmentStatus.SCHEDULED)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=100000.00)
 
     # Visit fields
     diagnose = models.TextField(blank=True, null=True)

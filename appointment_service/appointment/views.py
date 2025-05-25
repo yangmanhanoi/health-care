@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from .models import Appointment, AppointmentStatus
 from .serializers import AppointmentSerializer
 from core.utils.request_utils import extract_user_info_from_headers
+import requests
+from decimal import Decimal
 ACTION_MAP = {
     "confirm": {"status": AppointmentStatus.CONFIRMED, "roles": ["staff"]},
     "deny": {"status": AppointmentStatus.DENIED, "roles": ["staff"]},
@@ -31,7 +33,8 @@ def patient_appointment_list_create(request):
         data['patient_id'] = user_id
         serializer = AppointmentSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            # Hardcode the price to 100000 when creating appointment
+            appointment = serializer.save(price=100000.00)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -242,3 +245,73 @@ def conclude_appointment(request, appointment_id):
 
     serializer = AppointmentSerializer(appointment)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_appointment_total_price(request, appointment_id):
+    """
+    Get appointment total price including test results
+    """
+    user_id, roles, error_response = extract_user_info_from_headers(request)
+    if error_response:
+        return error_response
+
+    try:
+        appointment = Appointment.objects.get(id=appointment_id)
+    except Appointment.DoesNotExist:
+        return Response(
+            {"message": "Appointment not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Check permissions - users can only view their own appointments or doctors can view their patients' appointments
+    if not ('ADMIN' in roles or
+            ('DOCTOR' in roles and str(appointment.doctor_id) == str(user_id)) or
+            (('PATIENT' in roles or 'CUSTOMER' in roles) and str(appointment.patient_id) == str(user_id))):
+        return Response(
+            {"message": "You don't have permission to view this appointment"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    # Initialize response data
+    response_data = {
+        "appointment_id": appointment_id,
+        "price": float(appointment.price),
+        "test_results": [],
+        "totalPrice": float(appointment.price)
+    }
+
+    # Call laboratory service to get test results
+    try:
+        # Configure laboratory service URL - adjust this based on your setup
+        LABORATORY_SERVICE_URL = "http://service-laboratory:8005/api/"
+
+        # Forward the authentication headers to the laboratory service
+        headers = {
+            'X-User-Id': str(user_id),
+            'X-User-Roles': str(roles).replace("'", '"')  # Convert to JSON format
+        }
+
+        lab_response = requests.get(
+            f"{LABORATORY_SERVICE_URL}appointment/{appointment_id}/test-items/",
+            headers=headers,
+            timeout=10
+        )
+
+        if lab_response.status_code == 200:
+            lab_data = lab_response.json()
+            response_data["test_results"] = lab_data.get("test_items", [])
+            test_cost = lab_data.get("total_cost", 0)
+            response_data["totalPrice"] = float(appointment.price) + float(test_cost)
+        elif lab_response.status_code == 404:
+            # No test results found - this is okay, just use appointment price
+            pass
+        else:
+            # Log the error but don't fail the request
+            print(f"Laboratory service returned status {lab_response.status_code}")
+
+    except requests.exceptions.RequestException as e:
+        # Log the error but don't fail the request - laboratory service might be down
+        print(f"Error calling laboratory service: {str(e)}")
+        # Continue with just the appointment price
+
+    return Response(response_data, status=status.HTTP_200_OK)
