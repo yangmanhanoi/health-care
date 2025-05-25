@@ -9,7 +9,7 @@ from .models import User, Role
 from django.contrib.auth.hashers import make_password
 import requests
 
-DOCTOR_SERVICE_URL = 'http://svc-doctor/api/info'
+DOCTOR_SERVICE_URL = 'http://service-doctor:8002/api/info'
 # Create your views here.
 class LoginView(APIView):
     def post(self, request):
@@ -17,7 +17,7 @@ class LoginView(APIView):
         if serializer.is_valid():
             return Response(serializer.validated_data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 class RegisterCustomerView(CreateAPIView):
     serializer_class = RegisterSerializer
 
@@ -47,12 +47,12 @@ def register_doctor(request):
 
     if User.objects.filter(username=username).exists():
         return Response({"message": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     role = Role.objects.filter(name="DOCTOR").first()
 
     if not role:
         return Response({"message": "Role 'doctor' not found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     user = User.objects.create_user(username=username, password=password)
     user.save()
     user.roles.add(role)
@@ -70,5 +70,5 @@ def register_doctor(request):
         response.raise_for_status()
     except Exception as e:
         print("Error contacting doctor_service:", e)
-    
+
     return Response({"message": "Doctor account created successfully"}, status=status.HTTP_201_CREATED)

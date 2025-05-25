@@ -13,12 +13,24 @@ class AppointmentStatus(models.TextChoices):
     REJECTED = 'REJECTED', 'Rejected'
     EXCHANGE_REQUESTED = 'EXCHANGE_REQUESTED', 'Exchange Requested'
 
+    # Visit status
+    DIAGNOSING = 'DIAGNOSING', 'Diagnosing'
+    TESTING = 'TESTING', 'Testing'
+    CONCLUDING = 'CONCLUDING', 'Concluding'
+
 class Appointment(models.Model):
     doctor_id = models.CharField(max_length=255)
     patient_id = models.CharField(max_length=255)
     date = models.DateField()
     time = models.CharField(max_length=5)  # Format: HH:MM
     status = models.CharField(max_length=50, choices=AppointmentStatus.choices, default=AppointmentStatus.SCHEDULED)
+
+    # Visit fields
+    diagnose = models.TextField(blank=True, null=True)
+    conclusion = models.TextField(blank=True, null=True)
+    need_lab_test = models.BooleanField(default=False)
+
+    # Audit fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

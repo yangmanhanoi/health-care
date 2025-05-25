@@ -25,7 +25,13 @@ SECRET_KEY = '2q@gwas!u1=ib_6vg#z@-ra^bwz%2j4+3m4gvibc0(^y_$@b)v'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'service-appointment',
+    'api-gateway',
+    '*'  # Allow all hosts for development (remove in production)
+]
 
 
 # Application definition
@@ -79,7 +85,7 @@ WSGI_APPLICATION = 'appointment_service.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'doctor_db',
+        'NAME': 'appointment_db',
         'USER': 'namdt25',
         'PASSWORD': 'namdt25',
         'HOST': 'mysql_db',
