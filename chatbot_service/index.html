@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Medical Symptom Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.1;
+            }
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .model-selector {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .model-selector label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .model-select {
+            padding: 8px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 25px;
+            font-size: 14px;
+            background: white;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        .model-select:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.2);
+        }
+
+        .model-select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f1f3f4;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-bottom-right-radius: 8px;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #2d3748;
+            border-bottom-left-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4facfe;
+        }
+
+        .diagnosis-section {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #2d3748;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .metrics-section {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2d3748;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #38a169;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .recommendations-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #2d3748;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #ed8936;
+        }
+
+        .input-container {
+            padding: 25px 30px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .send-button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 172, 254, 0.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: #718096;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #cbd5e0;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .status-info {
+            font-size: 12px;
+            color: #718096;
+            text-align: center;
+            padding: 10px;
+            background: #f7fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .chat-container {
+                height: 90vh;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .model-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .model-select {
+                min-width: auto;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .input-container {
+                padding: 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .message-input,
+            .send-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>🏥 AI Medical Symptom Checker</h1>
+            <p>Advanced AI-powered diagnosis with multiple machine learning models</p>
+        </div>
+
+        <div class="model-selector">
+            <label for="model-select">Select AI Model:</label>
+            <select id="model-select" class="model-select">
+                <option value="rnn">🧠 RNN (Recurrent Neural Network)</option>
+                <option value="cnn">🔬 CNN (Convolutional Neural Network)</option>
+                <option value="fcnn">⚡ FCNN (Fully Connected Neural Network)</option>
+                <option value="rf">🌳 Random Forest</option>
+            </select>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    <strong>Welcome to the AI Medical Symptom Checker! 👋</strong><br><br>
+                    I can help you analyze your symptoms using advanced machine learning models.<br><br>
+                    <strong>To get started, type "start"</strong><br><br>
+                    You can either:
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Describe your symptoms naturally (e.g., "I have fever and cough")</li>
+                        <li>Answer step-by-step Y/N questions by typing "ask"</li>
+                    </ul>
+                    <em>⚠️ This is for informational purposes only. Always consult a healthcare professional for medical
+                        advice.</em>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <span>AI is analyzing</span>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="message-input" class="message-input" placeholder="Type your message here..."
+                autocomplete="off">
+            <button id="send-button" class="send-button">Send</button>
+        </div>
+
+        <div class="status-info">
+            <span id="status-text">Ready • Select your preferred AI model above</span>
+        </div>
+    </div>
+
+    <script>
+        class SymptomChecker {
+            constructor() {
+                this.currentStep = -1;
+                this.symptoms = [];
+                this.modelType = 'rnn';
+                this.isProcessing = false;
+
+                this.initializeElements();
+                this.attachEventListeners();
+                this.updateStatus('Ready • Type "start" to begin');
+            }
+
+            initializeElements() {
+                this.messagesContainer = document.getElementById('chat-messages');
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-button');
+                this.modelSelect = document.getElementById('model-select');
+                this.typingIndicator = document.getElementById('typing-indicator');
+                this.statusText = document.getElementById('status-text');
+            }
+
+            attachEventListeners() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                this.modelSelect.addEventListener('change', (e) => {
+                    this.modelType = e.target.value;
+                    this.updateStatus(`Model changed to ${e.target.options[e.target.selectedIndex].text}`);
+                });
+            }
+
+            updateStatus(message) {
+                this.statusText.textContent = message;
+            }
+
+            showTypingIndicator() {
+                this.typingIndicator.style.display = 'flex';
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                this.typingIndicator.style.display = 'none';
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+                }, 100);
+            }
+
+            addMessage(content, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+
+                if (isUser) {
+                    contentDiv.textContent = content;
+                } else {
+                    contentDiv.innerHTML = this.formatBotMessage(content);
+                }
+
+                messageDiv.appendChild(contentDiv);
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+
+                return messageDiv;
+            }
+
+            formatBotMessage(content) {
+                // Enhanced formatting for bot messages
+                let formatted = content.replace(/\n/g, '<br>');
+
+                // Format diagnosis section
+                if (formatted.includes('Diagnosis (using')) {
+                    formatted = formatted.replace(
+                        /(Diagnosis \(using [^)]+\):[^]*?)(?=You may have|$)/,
+                        '<div class="diagnosis-section">$1</div>'
+                    );
+                }
+
+                // Format metrics section
+                if (formatted.includes('Metrics:')) {
+                    formatted = formatted.replace(
+                        /(Metrics: [^<]*)/,
+                        '<div class="metrics-section"><strong>📊 Performance Metrics</strong><br>$1</div>'
+                    );
+                }
+
+                // Format recommendations
+                if (formatted.includes('Recommended Tests:') || formatted.includes('Recommended Treatments:')) {
+                    formatted = formatted.replace(
+                        /(Recommended Tests: [^<]*(?:<br>Recommended Treatments: [^<]*)?)/,
+                        '<div class="recommendations-section"><strong>💡 Recommendations</strong><br>$1</div>'
+                    );
+                }
+
+                // Highlight important phrases
+                formatted = formatted.replace(/You may have ([^(]+)/g, '<strong>🔍 Diagnosis: $1</strong>');
+                formatted = formatted.replace(/Do you have ([^?]+)\?/g, '<strong>❓ Do you have $1?</strong>');
+
+                return formatted;
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message || this.isProcessing) return;
+
+                this.isProcessing = true;
+                this.sendButton.disabled = true;
+                this.messageInput.disabled = true;
+
+                // Add user message
+                this.addMessage(message, true);
+                this.messageInput.value = '';
+
+                // Show typing indicator
+                this.showTypingIndicator();
+                this.updateStatus('AI is processing your symptoms...');
+
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            step: this.currentStep,
+                            symptoms: this.symptoms,
+                            model_type: this.modelType
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    // Update state
+                    this.currentStep = data.step;
+                    this.symptoms = data.symptoms || [];
+
+                    // Hide typing indicator
+                    this.hideTypingIndicator();
+
+                    // Add bot response
+                    this.addMessage(data.response);
+
+                    // Update status based on step
+                    if (this.currentStep === -1) {
+                        this.updateStatus('Session complete • Type "start" to begin again');
+                    } else if (this.currentStep === 0) {
+                        this.updateStatus('Waiting for symptom description...');
+                    } else if (this.currentStep > 0) {
+                        this.updateStatus(`Question ${this.currentStep} of ${this.getMaxQuestions()}`);
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.hideTypingIndicator();
+                    this.addMessage(
+                        '❌ Sorry, there was an error processing your request. Please try again or check your connection.',
+                        false
+                    );
+                    this.updateStatus('Error occurred • Please try again');
+                } finally {
+                    this.isProcessing = false;
+                    this.sendButton.disabled = false;
+                    this.messageInput.disabled = false;
+                    this.messageInput.focus();
+                }
+            }
+
+            getMaxQuestions() {
+                // This should match the number of symptoms in your backend
+                return 20; // Adjust based on your symptom_names length
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new SymptomChecker();
+        });
+    </script>
+</body>
+
+</html>
