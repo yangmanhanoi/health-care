@@ -6,6 +6,7 @@ from .serializers import AppointmentSerializer
 from core.utils.request_utils import extract_user_info_from_headers
 import requests
 from decimal import Decimal
+import logging
 ACTION_MAP = {
     "confirm": {"status": AppointmentStatus.CONFIRMED, "roles": ["staff"]},
     "deny": {"status": AppointmentStatus.DENIED, "roles": ["staff"]},
@@ -315,3 +316,210 @@ def get_appointment_total_price(request, appointment_id):
         # Continue with just the appointment price
 
     return Response(response_data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def doctor_appointment_list(request):
+    """
+    Get all appointments for the authenticated doctor with patient information
+    """
+    user_id, roles, error_response = extract_user_info_from_headers(request)
+    if error_response:
+        return error_response
+
+    # Check if user is a doctor
+    if 'DOCTOR' not in roles:
+        return Response(
+            {"message": "Only doctors can access this endpoint"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    # Get appointments for this doctor
+    appointments = Appointment.objects.filter(doctor_id=user_id).order_by('-date', '-time')
+    serializer = AppointmentSerializer(appointments, many=True)
+    appointments_data = serializer.data
+
+    # Enrich each appointment with patient information
+    for appointment_data in appointments_data:
+        try:
+            # The patient_id in appointment is actually the user_id from auth service
+            # We need to get all patients and find the one with matching user_id
+            # Forward the authentication headers to the patient service
+            headers = {
+                'X-User-Id': str(user_id),
+                'X-User-Roles': str(roles).replace("'", '"')  # Convert to JSON format
+            }
+
+            patient_response = requests.get(
+                f"http://service-patient:8004/api/patients/",
+                headers=headers,
+                timeout=10
+            )
+
+            if patient_response.status_code == 200:
+                patients_list = patient_response.json()
+                logging.info(f"Retrieved {len(patients_list)} patients from patient service")
+
+                # Find the patient with matching user_id
+                patient_info = None
+                for patient in patients_list:
+                    logging.info(f"Checking patient user_id: {patient.get('user_id')} against appointment patient_id: {appointment_data['patient_id']}")
+                    if str(patient.get('user_id')) == str(appointment_data['patient_id']):
+                        patient_info = patient
+                        logging.info(f"Found matching patient: {patient.get('fullName')}")
+                        break
+
+                appointment_data['patient_info'] = patient_info
+                if not patient_info:
+                    logging.warning(f"No patient found with user_id {appointment_data['patient_id']} in {len(patients_list)} patients")
+                    # Log all available user_ids for debugging
+                    available_user_ids = [str(p.get('user_id')) for p in patients_list]
+                    logging.warning(f"Available user_ids: {available_user_ids}")
+            else:
+                appointment_data['patient_info'] = None
+                logging.warning(f"Failed to get patients list: {patient_response.status_code} - {patient_response.text}")
+
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error calling patient service: {e}")
+            appointment_data['patient_info'] = None
+
+    return Response(appointments_data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def doctor_appointment_detail(request, appointment_id):
+    """
+    Get detailed appointment information for doctors including patient details
+    """
+    user_id, roles, error_response = extract_user_info_from_headers(request)
+    if error_response:
+        return error_response
+
+    # Check if user is a doctor
+    if 'DOCTOR' not in roles:
+        return Response(
+            {"message": "Only doctors can access this endpoint"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    try:
+        appointment = Appointment.objects.get(id=appointment_id)
+    except Appointment.DoesNotExist:
+        return Response(
+            {"message": "Appointment not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Check if this doctor owns the appointment
+    if str(appointment.doctor_id) != str(user_id):
+        return Response(
+            {"message": "You don't have permission to view this appointment"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    # Serialize appointment data
+    appointment_data = AppointmentSerializer(appointment).data
+
+    # Get patient information
+    try:
+        # The patient_id in appointment is actually the user_id from auth service
+        # Forward the authentication headers to the patient service
+        headers = {
+            'X-User-Id': str(user_id),
+            'X-User-Roles': str(roles).replace("'", '"')
+        }
+
+        patient_response = requests.get(
+            f"http://service-patient:8004/api/patients/",
+            headers=headers,
+            timeout=10
+        )
+
+        if patient_response.status_code == 200:
+            patients_list = patient_response.json()
+            # Find the patient with matching user_id
+            patient_info = None
+            for patient in patients_list:
+                if str(patient.get('user_id')) == str(appointment.patient_id):
+                    patient_info = patient
+                    break
+
+            appointment_data['patient_info'] = patient_info
+            if not patient_info:
+                logging.warning(f"No patient found with user_id {appointment.patient_id}")
+        else:
+            appointment_data['patient_info'] = None
+            logging.warning(f"Failed to get patients list: {patient_response.status_code} - {patient_response.text}")
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error calling patient service: {e}")
+        appointment_data['patient_info'] = None
+
+    # Get lab test results if needed
+    if appointment.need_lab_test:
+        try:
+            headers = {
+                'X-User-Id': str(user_id),
+                'X-User-Roles': str(roles).replace("'", '"')
+            }
+
+            lab_response = requests.get(
+                f"http://service-laboratory:8005/api/appointment/{appointment_id}/test-items/",
+                headers=headers,
+                timeout=10
+            )
+
+            if lab_response.status_code == 200:
+                lab_data = lab_response.json()
+                appointment_data['test_results'] = lab_data.get("test_items", [])
+                test_cost = lab_data.get("total_cost", 0)
+                appointment_data['total_price'] = float(appointment.price) + float(test_cost)
+            else:
+                appointment_data['test_results'] = []
+                appointment_data['total_price'] = float(appointment.price)
+                logging.warning(f"Failed to get lab results for appointment {appointment_id}: {lab_response.status_code}")
+
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error calling laboratory service: {e}")
+            appointment_data['test_results'] = []
+            appointment_data['total_price'] = float(appointment.price)
+    else:
+        appointment_data['test_results'] = []
+        appointment_data['total_price'] = float(appointment.price)
+
+    return Response(appointment_data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def test_patient_service(request):
+    """
+    Test endpoint to check patient service connectivity
+    """
+    user_id, roles, error_response = extract_user_info_from_headers(request)
+    if error_response:
+        return error_response
+
+    try:
+        headers = {
+            'X-User-Id': str(user_id),
+            'X-User-Roles': str(roles).replace("'", '"')
+        }
+
+        patient_response = requests.get(
+            f"http://service-patient:8004/api/patients/",
+            headers=headers,
+            timeout=10
+        )
+
+        return Response({
+            "status_code": patient_response.status_code,
+            "response_text": patient_response.text[:500],  # First 500 chars
+            "headers_sent": headers,
+            "user_id": user_id,
+            "roles": roles
+        }, status=status.HTTP_200_OK)
+
+    except requests.exceptions.RequestException as e:
+        return Response({
+            "error": str(e),
+            "headers_sent": headers,
+            "user_id": user_id,
+            "roles": roles
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

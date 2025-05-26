@@ -22,12 +22,12 @@ def availability_list_create(request):
                 doctor = Doctor.objects.get(user_id=user_id)
                 availabilities = Availability.objects.filter(doctor=doctor)
             except Doctor.DoesNotExist:
-                return Response({"message": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)  
+                return Response({"message": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
             availabilities = Availability.objects.all()
         serializer = AvailabilitySerializer(availabilities, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     elif request.method == 'POST':
         serializer = AvailabilitySerializer(data=request.data)
         if serializer.is_valid():
@@ -43,7 +43,7 @@ def availability_list_create(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 @api_view(['GET'])
 def get_availability_by_doctor(request, doctor_id):
     try:
@@ -57,7 +57,7 @@ def get_availability_by_doctor(request, doctor_id):
 @api_view(['GET'])
 def get_availability_by_doctor_and_date(request, doctor_id, date):
     try:
-        doctor = Doctor.objects.get(id=doctor_id)
+        doctor = Doctor.objects.get(user_id=doctor_id)
     except Doctor.DoesNotExist:
         return Response({"message": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -67,7 +67,7 @@ def get_availability_by_doctor_and_date(request, doctor_id, date):
 @api_view(['GET'])
 def get_availability_by_doctor_and_date_and_time(request, doctor_id, date):
     try:
-        doctor = Doctor.objects.get(id=doctor_id)
+        doctor = Doctor.objects.get(user_id=doctor_id)
     except Doctor.DoesNotExist:
         return Response({"message": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -101,5 +101,5 @@ def availability_detail(request, pk):
             return Response({"message": "You do not have permission to access this availability"}, status=status.HTTP_403_FORBIDDEN)
         availability.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
 # Get appointments for the doctor from Appointment Service

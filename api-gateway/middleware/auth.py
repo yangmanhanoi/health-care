@@ -6,6 +6,7 @@ WHITELIST_PATHS = [
     # Auth service endpoints - no authentication required
     ('POST', 'svc-auth/api/login'),
     ('POST', 'svc-auth/api/register/customer'),
+    ('POST', 'svc-auth/api/register/patient'),
     ('POST', 'svc-auth/api/register/doctor'),
     ('POST', 'svc-auth/api/refresh-token'),
 

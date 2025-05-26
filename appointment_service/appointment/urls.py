@@ -9,4 +9,7 @@ urlpatterns = [
     path('<int:appointment_id>/complete-lab-test', complete_lab_test, name='complete-lab-test'),
     path('<int:appointment_id>/conclusion', conclude_appointment, name='conclude-appointment'),
     path('<int:appointment_id>/total-price', get_appointment_total_price, name='get-appointment-total-price'),
+    # Doctor endpoints
+    path('doctor', doctor_appointment_list, name='doctor-appointment-list'),
+    path('doctor/<int:appointment_id>', doctor_appointment_detail, name='doctor-appointment-detail'),
 ]
