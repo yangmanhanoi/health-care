@@ -1,0 +1,249 @@
+[
+  {
+    "name": "Flu",
+    "symptoms": [
+      "Fever",
+      "Cough",
+      "Fatigue",
+      "Sore Throat",
+      "Headache",
+      "Muscle Pain"
+    ],
+    "tests": ["Influenza A/B test", "Nasal swab"],
+    "treatments": ["Oseltamivir (Tamiflu)", "Rest", "Hydration"],
+    "severity": "Moderate",
+    "advice": "Nghỉ ngơi, uống nhiều nước, tránh tiếp xúc gần với người khác.",
+    "prevalence": 0.3
+  },
+  {
+    "name": "Cold",
+    "symptoms": [
+      "Cough",
+      "Sneezing",
+      "Runny Nose",
+      "Sore Throat",
+      "Mild Fever"
+    ],
+    "tests": ["Nasal swab"],
+    "treatments": ["Rest", "Fluids", "Antihistamines"],
+    "severity": "Mild",
+    "advice": "Giữ ấm, tránh gió lạnh, dùng khăn giấy khi hắt hơi.",
+    "prevalence": 0.4
+  },
+  {
+    "name": "COVID-19",
+    "symptoms": [
+      "Fever",
+      "Cough",
+      "Loss of Taste",
+      "Shortness of Breath",
+      "Fatigue"
+    ],
+    "tests": ["PCR test", "Rapid antigen test"],
+    "treatments": ["Isolation", "Paracetamol", "Consult doctor"],
+    "severity": "Severe",
+    "advice": "Cách ly tại nhà, theo dõi SpO2, gọi bác sĩ nếu khó thở.",
+    "prevalence": 0.1
+  },
+  {
+    "name": "Allergy",
+    "symptoms": ["Sneezing", "Itchy Eyes", "Runny Nose", "Rash"],
+    "tests": ["Allergy skin test", "Blood IgE test"],
+    "treatments": ["Loratadine", "Cetirizine", "Avoid allergens"],
+    "severity": "Mild",
+    "advice": "Tránh tiếp xúc với chất gây dị ứng như phấn hoa, bụi.",
+    "prevalence": 0.2
+  },
+  {
+    "name": "Depressive disorder (depression)",
+    "symptoms": [
+      "During a depressive episode, a person experiences a depressed mood (feeling sad, irritable, empty)",
+      "They may feel a loss of pleasure or interest in activities",
+      "A depressive episode is different from regular mood fluctuations",
+      "They last most of the day, nearly every day, for at least two weeks",
+      "Other symptoms are also present, which may include",
+      "Depression can cause difficulties in all aspects of life, including in the community and at home, work and school",
+      "A depressive episode can be categorized as mild, moderate, or severe depending on the number and severity of symptoms, as well as the impact on the individuals functioning",
+      "There are different patterns of depressive episodes including",
+      "single episode depressive disorder, meaning the persons first and only episode;recurrent depressive disorder, meaning the person has a history of at least two depressive episodes"
+    ],
+    "tests": [
+      "There are effective treatments for depression",
+      "These include psychological treatment and medications",
+      "Seek care if you have symptoms of depression",
+      "Psychological treatments are the first treatments for depression",
+      "They can be combined with antidepressant medications in moderate and severe depression"
+    ],
+    "treatments": [],
+    "severity": "High",
+    "advice": "Consult a healthcare professional for proper diagnosis and treatment.",
+    "prevalence": 0.05
+  },
+  {
+    "name": "HIV and AIDS",
+    "symptoms": [
+      "The symptoms of HIV vary depending on the stage of infection",
+      "HIV spreads more easily in the first few months after a person is infected, but many are unaware of their status until the later stages",
+      "In the first few weeks after being infected people may not experience symptoms",
+      "Others may have an influenza-like illness including",
+      "feverheadacherashsore throat",
+      "The infection progressively weakens the immune system",
+      "This can cause other signs and symptoms",
+      "swollen lymph nodesweight lossfeverdiarrhoeacough",
+      "Without treatment, people living with HIV infection can also develop severe illnesses",
+      "tuberculosis (TB)cryptococcal meningitissevere bacterial infectionscancers such as lymphomas and Kaposis sarcoma"
+    ],
+    "tests": [
+      "HIV can be diagnosed through rapid diagnostic tests that provide same-day results",
+      "This greatly facilitates early diagnosis and linkage with treatment and prevention",
+      "People can also use HIV self-tests to test themselves",
+      "However, no single test can provide a full HIV positive diagnosis",
+      "confirmatory testing is required, conducted by a qualified and trained health worker or community worker"
+    ],
+    "treatments": [
+      "There is no cure for HIV infection",
+      "It is treated with antiretroviral drugs, which stop the virus from replicating in the body",
+      "Current antiretroviral therapy (ART) does not cure HIV infection but allows a persons immune system to get stronger",
+      "This helps them to fight other infections",
+      "Currently, ART must be taken every day for the rest of a persons life"
+    ],
+    "severity": "Moderate",
+    "advice": "HIV is a preventable disease Reduce the risk of HIV infection by There is no cure for HIV infection",
+    "prevalence": 0.65
+  },
+  {
+    "name": "Tuberculosis",
+    "symptoms": [
+      "People with TB infection dont feel sick and arent contagious",
+      "Only a small proportion of people who get infected with TB will get TB disease and symptoms",
+      "Babies and children are at higher risk",
+      "TB disease occurs when bacteria multiply in the body and affect different organs",
+      "TB symptoms may be mild for many months, so it is easy to spread TB to others without knowing it",
+      "Some people with TB disease do not have any symptoms",
+      "Common symptoms of TB are",
+      "prolonged cough (sometimes with blood)chest painweaknessfatigueweight lossfevernight sweats The symptoms people get depend on which part of the body is affected by TB",
+      "While TB usually affects the lungs, it can also involve the kidneys, brain, spine and skin"
+    ],
+    "tests": [
+      "WHO recommends the use of rapid molecular diagnostic tests as the initial diagnostic test in all persons with signs and symptoms of TB",
+      "Rapid diagnostic tests recommended by WHO include the Xpert MTBRIF Ultra and Truenat assays",
+      "These tests have high diagnostic accuracy and will lead to major improvements in the early detection of TB and drug-resistant TB",
+      "A tuberculin skin test (TST), interferon gamma release assay (IGRA) or newer antigen-based skin tests (TBST) can be used to identity people with infection",
+      "Diagnosing multidrug-resistant and other resistant forms of TB (see multidrug-resistant TB section below) as well as HIV-associated TB can be complex and expensive"
+    ],
+    "treatments": [
+      "Tuberculosis disease is treated with special antibiotics",
+      "Treatment is recommended for both TB infection and disease",
+      "The most common antibiotics used are",
+      "isoniazidrifampicinpyrazinamideethambutol",
+      "To be effective, medications need to be taken daily for 46 months"
+    ],
+    "severity": "High",
+    "advice": "Follow these steps to help prevent tuberculosis infection and spread TB preventive treatment (or TPT) prevents infection from becoming disease Tuberculosis disease is treated with special antibiotics",
+    "prevalence": 0.1
+  },
+  {
+    "name": "Hypertension",
+    "symptoms": [
+      "Most people with hypertension dont feel any symptoms",
+      "Very high blood pressures can cause headaches, blurred vision, chest pain and other symptoms",
+      "Checking your blood pressure is the best way to know if you have high blood pressure",
+      "If hypertension isnt treated, it can cause other health conditions like kidney disease, heart disease and stroke",
+      "People with very high blood pressure (usually 180120 or higher) can experience symptoms including",
+      "The only way to detect hypertension is to have a health professional measure blood pressure",
+      "Having blood pressure measured is quick and painless",
+      "Although individuals can measure their own blood pressure using automated devices, an evaluation by a health professional is important for assessment of risk and associated conditions"
+    ],
+    "tests": [],
+    "treatments": [
+      "Lifestyle changes can help lower high blood pressure",
+      "These include",
+      "eating a healthy, low-salt dietlosing weightbeing physically activequitting tobacco",
+      "If you have high blood pressure, your doctor may recommend one or more medicines",
+      "Your recommended blood pressure goal may depend on what other health conditions you have"
+    ],
+    "severity": "High",
+    "advice": "Lifestyle changes can help lower high blood pressure and can help anyone with hypertension Many who make these changes will still need to take medicine Lifestyle changes can help lower high blood pres",
+    "prevalence": 0.46
+  },
+  {
+    "name": "Cancer",
+    "symptoms": [],
+    "tests": [
+      "Cancer mortality is reduced when cases are detected and treated early",
+      "There are two components of early detection",
+      "early diagnosis and screening",
+      "When identified early, cancer is more likely to respond to treatment and can result in a greater probability of survival with less morbidity, as well as less expensive treatment",
+      "Significant improvements can be made in the lives of cancer patients by detecting cancer early and avoiding delays in care"
+    ],
+    "treatments": [
+      "A correct cancer diagnosis is essential for appropriate and effective treatment because every cancer type requires a specific treatment regimen",
+      "Treatment usually includes surgery, radiotherapy, andor systemic therapy (chemotherapy, hormonal treatments, targeted biological therapies)",
+      "Proper selection of a treatment regimen takes into consideration both the cancer and the individual being treated",
+      "Completion of the treatment protocol in a defined period of time is important to achieve the predicted therapeutic result",
+      "Determining the goals of treatment is an important first step"
+    ],
+    "severity": "High",
+    "advice": "Cancer risk can be reduced by not using tobacco;maintaining a healthy body weight;eating a healthy diet, including fruit and vegetables A correct cancer diagnosis is essential for appropriate and effe",
+    "prevalence": 0.3
+  },
+  {
+    "name": "Hepatitis B",
+    "symptoms": [
+      "Most people do not experience any symptoms when newly infected",
+      "Some people have acute illness with symptoms that last several weeks",
+      "yellowing of the skin and eyes (jaundice)dark urinefeeling very tirednauseavomitingpain in the abdomen",
+      "When severe, acute hepatitis can lead to liver failure, which can lead to death",
+      "These diseases can be fatal"
+    ],
+    "tests": [
+      "It is not possible on clinical grounds to differentiate hepatitis B from hepatitis caused by other viral agents",
+      "hence laboratory confirmation of the diagnosis is essential",
+      "Several blood tests are available to diagnose and monitor people with hepatitis B",
+      "Some laboratory tests can be used to distinguish acute and chronic infections, whilst other can assess and monitor the severity of liver disease",
+      "Physical examination, ultrasound, fibroscan can also be performed to assess degree of liver fibrosis and scarring and monitor progression of liver disease"
+    ],
+    "treatments": [
+      "There is no specific treatment for acute hepatitis B",
+      "Chronic hepatitis B can be treated with medicines",
+      "Care for acute hepatitis B should focus on making the person comfortable",
+      "They should eat a healthy diet and drink plenty of liquids to prevent dehydration from vomiting and diarrhoea",
+      "Chronic hepatitis B infection can be treated with oral medicines, including tenofovir or entecavir"
+    ],
+    "severity": "High",
+    "advice": "Hepatitis B is preventable with a vaccine All babies should receive the hepatitis B vaccine as soon as possible after birth (within 24 hours) There is no specific treatment for acute hepatitis B",
+    "prevalence": 1.0
+  },
+  {
+    "name": "Coronavirus disease (COVID-19)",
+    "symptoms": [],
+    "tests": [],
+    "treatments": [],
+    "severity": "Moderate",
+    "advice": "Consult a healthcare professional for proper diagnosis and treatment.",
+    "prevalence": 0.073
+  },
+  {
+    "name": "Diabetes",
+    "symptoms": [
+      "Symptoms of diabetes may occur suddenly",
+      "In type 2 diabetes, the symptoms can be mild and may take many years to be noticed",
+      "Symptoms of diabetes include",
+      "People with diabetes have a higher risk of health problems including heart attack, stroke and kidney failure",
+      "Diabetes can cause permanent vision loss by damaging blood vessels in the eyes",
+      "Many people with diabetes develop problems with their feet from nerve damage and poor blood flow",
+      "This can cause foot ulcers and may lead to amputation"
+    ],
+    "tests": [
+      "Early diagnosis can be accomplished through relatively inexpensive testing of blood glucose",
+      "People with type 1 diabetes need insulin injections for survival",
+      "One of the most important ways to treat diabetes is to keep a healthy lifestyle",
+      "Some people with type 2 diabetes will need to take medicines to help manage their blood sugar levels",
+      "These can include insulin injections or other medicines"
+    ],
+    "treatments": [],
+    "severity": "High",
+    "advice": "Lifestyle changes are the best way to prevent or delay the onset of type 2 diabetes To help prevent type 2 diabetes and its complications, people should",
+    "prevalence": 0.11
+  }
+]
