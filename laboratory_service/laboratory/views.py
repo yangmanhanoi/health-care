@@ -324,9 +324,9 @@ def upload_test_result(request, order_item_id):
     if error_response:
         return error_response
 
-    # Only lab technicians and admins can upload results
-    if not ('ADMIN' in roles or 'LAB_TECHNICIAN' in roles):
-        return Response({"message": "Only lab technicians can upload test results"},
+    # Only doctors, lab technicians and admins can upload results
+    if not ('ADMIN' in roles or 'LAB_TECHNICIAN' in roles or 'DOCTOR' in roles):
+        return Response({"message": "Only doctors, lab technicians and admins can upload test results"},
                         status=status.HTTP_403_FORBIDDEN)
 
     try:
@@ -442,9 +442,9 @@ def update_test_result(request, result_id):
     if error_response:
         return error_response
 
-    # Only lab technicians and admins can update results
-    if not ('ADMIN' in roles or 'LAB_TECHNICIAN' in roles):
-        return Response({"message": "Only lab technicians can update test results"},
+    # Only doctors, lab technicians and admins can update results
+    if not ('ADMIN' in roles or 'LAB_TECHNICIAN' in roles or 'DOCTOR' in roles):
+        return Response({"message": "Only doctors, lab technicians and admins can update test results"},
                         status=status.HTTP_403_FORBIDDEN)
 
     try:

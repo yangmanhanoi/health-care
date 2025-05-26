@@ -21,7 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-oj@q*x@rkzw!$c248zc^gho2w=4+o=zv$0qf0p1e9ohx@1%kkh'
+# Using the same secret key as API Gateway for JWT token verification
+SECRET_KEY = 'django-insecure-4a&x1!*-y6$vglx$z4b$fs&+etngop*m%r2s*mfj#q+q5=qw!-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -45,8 +46,8 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'core.authentication.NoAuthAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'core.authentication.NoAuthAuthentication',  # Fallback for testing
     ),
 }
 

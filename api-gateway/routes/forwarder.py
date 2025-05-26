@@ -36,6 +36,9 @@ def forward_to_service(service_prefix, path):
     data = request.json if request.method in ['POST', 'PUT'] else None
 
     # Forward request tới service tương ứng
+    # Handle trailing slash properly to avoid 301 redirects
+    if path and not path.endswith('/'):
+        path = f"{path}/"
     service_request_url = f"{service_url}/{path}"
 
     # Log the request details
