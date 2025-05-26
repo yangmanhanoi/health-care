@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách lịch khám</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fa;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            padding-left: 40px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+            background: white;
+        }
+
+        .search-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #3367d6;
+        }
+
+        /* Table Section */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: #f1f3f4;
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            border-bottom: 1px solid #e8eaed;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #e8eaed;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Column specific styling */
+        .col-stt {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .col-id {
+            width: 80px;
+            font-weight: 600;
+        }
+
+        .col-name {
+            width: 200px;
+            font-weight: 500;
+        }
+
+        .col-name .patient-name {
+            color: #4285f4;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .col-name .patient-name:hover {
+            color: #3367d6;
+            text-decoration: underline;
+        }
+
+        .col-date {
+            width: 120px;
+        }
+
+        .col-gender {
+            width: 80px;
+            text-align: center;
+        }
+
+        .col-phone {
+            width: 130px;
+        }
+
+        .col-address {
+            width: 200px;
+        }
+
+        .col-appointment {
+            width: 120px;
+        }
+
+        /* Gender badge */
+        .gender-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+            min-width: 40px;
+        }
+
+        .gender-nu {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .gender-nam {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4285f4;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .page-title {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .search-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .table {
+                min-width: 800px;
+            }
+
+            .table th,
+            .table td {
+                padding: 12px 8px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 20px;
+            }
+
+            .search-section {
+                padding: 15px;
+            }
+
+            .table th,
+            .table td {
+                padding: 10px 6px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Danh sách lịch khám</h1>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Tìm kiếm" id="searchInput">
+            </div>
+            <button class="search-btn" onclick="searchAppointments()">Search</button>
+        </div>
+
+        <!-- Results Table -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="col-stt">STT</th>
+                        <th class="col-id">ID</th>
+                        <th class="col-name">HỌ TÊN</th>
+                        <th class="col-date">NGÀY SINH</th>
+                        <th class="col-gender">GIỚI TÍNH</th>
+                        <th class="col-phone">SĐT</th>
+                        <th class="col-address">ĐỊA CHỈ</th>
+                        <th class="col-appointment">NGÀY KHÁM</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentTableBody">
+                    <tr>
+                        <td class="col-stt">1</td>
+                        <td class="col-id">00001</td>
+                        <td class="col-name">
+                            <a href="#" class="patient-name" onclick="viewPatientProfile('00001', 'Christine Brooks', '22/11/2005', 'Nữ', '0912345678', '123 Street, London', '22/11/2025')">Christine Brooks</a>
+                        </td>
+                        <td class="col-date">22/11/2005</td>
+                        <td class="col-gender">
+                            <span class="gender-badge gender-nu">Nữ</span>
+                        </td>
+                        <td class="col-phone">0912345678</td>
+                        <td class="col-address">123 Street, London</td>
+                        <td class="col-appointment">22/11/2025</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+         const appointmentsData = [
+            {
+                id: '00001',
+                name: 'Christine Brooks',
+                birthDate: '22/11/2005',
+                gender: 'Nữ',
+                phone: '0912345678',
+                address: '123 Street, London',
+                appointmentDate: '22/11/2025'
+            },
+        //     {
+        //         id: '00002',
+        //         name: 'Nguyễn Văn A',
+        //         birthDate: '15/03/1990',
+        //         gender: 'Nam',
+        //         phone: '0987654321',
+        //         address: '456 Đường ABC, Hà Nội',
+        //         appointmentDate: '23/11/2025'
+        //     },
+        //     {
+        //         id: '00003',
+        //         name: 'Trần Thị B',
+        //         birthDate: '20/07/1985',
+        //         gender: 'Nữ',
+        //         phone: '0901234567',
+        //         address: '789 Phố XYZ, TP.HCM',
+        //         appointmentDate: '24/11/2025'
+        //     }
+        ];
+
+         let currentData = [...appointmentsData];
+        //let currentData = [];
+
+
+        function viewPatientProfile(id, name, birthDate, gender, phone, address, appointmentDate) {
+            const params = new URLSearchParams({
+                id: id,
+                name: name,
+                birthDate: birthDate,
+                gender: gender,
+                phone: phone,
+                address: address,
+                appointmentDate: appointmentDate
+            });
+            
+            window.location.href = `PatientProfile.html?${params.toString()}`;
+        }
+
+        function renderTable(data = null) {
+            const tbody = document.getElementById('appointmentTableBody');
+
+    if (!appointmentsData.length) {
+        // Show loading
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="loading">
+                    <div class="spinner"></div>
+                    <div>Đang tải dữ liệu...</div>
+                </td>
+            </tr>
+        `;
+
+        const keyword = document.getElementById('searchInput')?.value?.trim();
+
+const url = keyword
+    ? `http://your-api-domain.com/api/ListOfBooking?search=${encodeURIComponent(keyword)}`
+    : `http://your-api-domain.com/api/ListOfBooking`;
+
+
+        // Fetch from API
+        fetch(url)  // Replace with your actual API
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(dataFromApi => {
+                appointmentsData = dataFromApi.map(item => ({
+                    id: item.id || '',
+                    name: item.name || '',
+                    birthDate: item.birthDate || '',
+                    gender: item.gender || '',
+                    phone: item.phone || '',
+                    address: item.address || '',
+                    appointmentDate: item.appointmentDate || ''
+                }));
+
+                currentData = [...appointmentsData];
+                renderTable(currentData); // Call render again with fresh data
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="error-state">
+                            <div class="error-icon">❌</div>
+                            <div>Lỗi khi tải dữ liệu lịch khám</div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+        return; // Stop execution until fetch is done
+    }
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <div>Không tìm thấy kết quả nào</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.map((item, index) => `
+                <tr>
+                    <td class="col-stt">${index + 1}</td>
+                    <td class="col-id">${item.id}</td>
+                    <td class="col-name">
+                        <a href="#" class="patient-name" onclick="viewPatientProfile('${item.id}', '${item.name}', '${item.birthDate}', '${item.gender}', '${item.phone}', '${item.address}', '${item.appointmentDate}')">${item.name}</a>
+                    </td>
+                    <td class="col-date">${item.birthDate}</td>
+                    <td class="col-gender">
+                        <span class="gender-badge ${item.gender === 'Nữ' ? 'gender-nu' : 'gender-nam'}">${item.gender}</span>
+                    </td>
+                    <td class="col-phone">${item.phone}</td>
+                    <td class="col-address">${item.address}</td>
+                    <td class="col-appointment">${item.appointmentDate}</td>
+                </tr>
+            `).join('');
+        }
+
+    //     function searchAppointments() {
+    //         // keyword = keyword.trim().toLowerCase();
+    //         const keyword = document.getElementById('searchInput').value;
+
+
+    // if (!appointmentsData.length) {
+    //     console.warn("Dữ liệu chưa được tải xong.");
+    //     return;
+    // }
+
+    // const filteredData = appointmentsData.filter(item =>
+    //     item.name.toLowerCase().includes(keyword) ||
+    //     item.phone.toLowerCase().includes(keyword) ||
+    //     item.address.toLowerCase().includes(keyword) ||
+    //     item.gender.toLowerCase().includes(keyword) ||
+    //     item.id.toString().includes(keyword)
+    // );
+
+    // currentData = filteredData;
+    // renderTable(currentData);
+            
+    //         if (!searchTerm) {
+    //             currentData = [...appointmentsData];
+    //             renderTable(currentData);
+    //             return;
+    //         }
+
+    //         // Show loading state
+    //         document.getElementById('appointmentTableBody').innerHTML = `
+    //             <tr>
+    //                 <td colspan="8" class="loading">
+    //                     <div class="spinner"></div>
+    //                     <div>Đang tìm kiếm...</div>
+    //                 </td>
+    //             </tr>
+    //         `;
+
+    //         // Simulate search delay
+    //         setTimeout(() => {
+    //             currentData = appointmentsData.filter(item => 
+    //                 item.name.toLowerCase().includes(searchTerm) ||
+    //                 item.id.toLowerCase().includes(searchTerm) ||
+    //                 item.phone.includes(searchTerm) ||
+    //                 item.address.toLowerCase().includes(searchTerm)
+    //             );
+                
+    //             renderTable(currentData);
+    //         }, 500);
+    //     }
+function searchAppointments() {
+    const keyword = document.getElementById('searchInput').value;
+    renderTable(keyword); // Now performs API-based search
+}
+
+       // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchAppointments();
+            }
+        });
+
+        // Real-time search (optional)
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                searchAppointments();
+            }, 300);
+        });
+//         function handleSearch() {
+//     const keyword = document.getElementById('searchInput').value;
+//     searchAppointments(keyword);
+// }
+
+
+        // Initialize table
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTable(currentData);
+        });
+    </script>
+</body>
+</html>

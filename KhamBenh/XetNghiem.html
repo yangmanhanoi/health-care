@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách xét nghiệm</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fa;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #f8f9fa;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+            background: white;
+        }
+
+        .search-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #3367d6;
+        }
+
+        /* Table Section */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: #f1f3f4;
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            border-bottom: 1px solid #e8eaed;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #e8eaed;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Column specific styling */
+        .col-stt {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .col-id {
+            width: 100px;
+            font-weight: 600;
+        }
+
+        .col-name {
+            width: 200px;
+            font-weight: 500;
+        }
+
+        .col-time {
+            width: 150px;
+            text-align: center;
+        }
+
+        .col-doctor {
+            width: 150px;
+            text-align: center;
+        }
+
+        /* Selected tests section */
+        .selected-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .selected-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .selected-table th {
+            background: #f1f3f4;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            border-bottom: 1px solid #e8eaed;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .selected-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e8eaed;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .selected-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .col-action {
+            width: 80px;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+        }
+
+        /* Add button */
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+        }
+
+        .add-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Button group */
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #333;
+            border: 1px solid #dadce0;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3367d6;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .page-title {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .search-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .table {
+                min-width: 600px;
+            }
+
+            .table th,
+            .table td,
+            .selected-table th,
+            .selected-table td {
+                padding: 12px 8px;
+                font-size: 13px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Danh sách xét nghiệm</h1>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Tìm kiếm" id="searchInput">
+            </div>
+            <button class="search-btn" onclick="searchTests()">Search</button>
+        </div>
+
+        <!-- Available Tests Table -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="col-stt">STT</th>
+                        <th class="col-id">ID</th>
+                        <th class="col-name">TÊN</th>
+                        <th class="col-time">THỜI GIAN NHẬN KẾT QUẢ</th>
+                        <th class="col-doctor">BÁC SĨ XÉT NGHIỆM</th>
+                        <th class="col-action">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody id="testsTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Selected Tests Section -->
+        <div class="selected-section">
+            <table class="selected-table">
+                <thead>
+                    <tr>
+                        <th class="col-stt">STT</th>
+                        <th class="col-id">ID</th>
+                        <th class="col-name">TÊN</th>
+                        <th class="col-time">THỜI GIAN NHẬN KẾT QUẢ</th>
+                        <th class="col-doctor">BÁC SĨ XÉT NGHIỆM</th>
+                        <th class="col-action">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody id="selectedTestsBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Button Group -->
+        <div class="button-group">
+            <button type="button" class="btn btn-secondary" onclick="goBack()">Quay lại</button>
+            <button type="button" class="btn btn-primary" onclick="saveAndContinue()">Tiếp theo</button>
+        </div>
+    </div>
+
+    <script>
+        // Sample test data
+        // const availableTests = [
+        //     {
+        //         id: '00001',
+        //         name: 'Xét nghiệm máu',
+        //         time: '60 phút',
+        //         doctor: 'Lê Văn B'
+        //     },
+        //     {
+        //         id: '00002',
+        //         name: 'Xét nghiệm nước tiểu',
+        //         time: '30 phút',
+        //         doctor: 'Nguyễn Thị C'
+        //     },
+        //     {
+        //         id: '00003',
+        //         name: 'Xét nghiệm đường huyết',
+        //         time: '45 phút',
+        //         doctor: 'Trần Văn D'
+        //     },
+        //     {
+        //         id: '00004',
+        //         name: 'Xét nghiệm cholesterol',
+        //         time: '90 phút',
+        //         doctor: 'Phạm Thị E'
+        //     },
+        //     {
+        //         id: '00005',
+        //         name: 'Xét nghiệm gan',
+        //         time: '120 phút',
+        //         doctor: 'Hoàng Văn F'
+        //     }
+        // ];
+
+        // let filteredTests = [...availableTests];
+        // let selectedTests = [];
+        let availableTests = [];
+        let filteredTests = [];
+        let selectedTests = [];
+
+
+        async function fetchAvailableTests(keyword = '') {
+    try {
+        const url = keyword.trim()
+            ? `http://your-api-domain.com/api/ListOfBooking?search=${encodeURIComponent(keyword.trim())}`
+            : `http://your-api-domain.com/api/ListOfBooking`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch tests');
+
+        const data = await response.json();
+        // const data = [
+        //     { id: 'FAKE001', name: 'Xét nghiệm giả lập', time: '08:00', doctor: 'Dr. Demo' },
+        //     { id: 'FAKE002', name: 'Xét nghiệm máu', time: '09:30', doctor: 'Dr. Huyền' },
+        // ];
+
+        availableTests = data; // assumes the API returns an array of test objects
+        filteredTests = [...availableTests];
+        renderAvailableTests(filteredTests);
+    } catch (error) {
+        console.error('Error loading tests:', error);
+        document.getElementById('testsTableBody').innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <div>Không thể tải danh sách xét nghiệm</div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+        function renderAvailableTests(tests) {
+            const tbody = document.getElementById('testsTableBody');
+            
+            if (tests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-icon">🔬</div>
+                            <div>Không tìm thấy xét nghiệm nào</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = tests.map((test, index) => {
+                const isSelected = selectedTests.some(selected => selected.id === test.id);
+                return `
+                    <tr>
+                        <td class="col-stt">${index + 1}</td>
+                        <td class="col-id">${test.id}</td>
+                        <td class="col-name">${test.name}</td>
+                        <td class="col-time">${test.time}</td>
+                        <td class="col-doctor">${test.doctor}</td>
+                        <td class="col-action">
+                            <button class="add-btn" onclick="addTest('${test.id}')" ${isSelected ? 'disabled' : ''}>
+                                ${isSelected ? 'Đã chọn' : 'Chọn'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderSelectedTests() {
+            const tbody = document.getElementById('selectedTestsBody');
+            
+            if (selectedTests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div>Chưa chọn xét nghiệm nào</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = selectedTests.map((test, index) => `
+                <tr>
+                    <td class="col-stt">${index + 1}</td>
+                    <td class="col-id">${test.id}</td>
+                    <td class="col-name">${test.name}</td>
+                    <td class="col-time">${test.time}</td>
+                    <td class="col-doctor">${test.doctor}</td>
+                    <td class="col-action">
+                        <button class="remove-btn" onclick="removeTest('${test.id}')">✕</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function addTest(testId) {
+            const test = availableTests.find(t => t.id === testId);
+            if (test && !selectedTests.some(selected => selected.id === testId)) {
+                selectedTests.push(test);
+                renderSelectedTests();
+                renderAvailableTests(filteredTests);
+            }
+        }
+
+        function removeTest(testId) {
+            selectedTests = selectedTests.filter(test => test.id !== testId);
+            renderSelectedTests();
+            renderAvailableTests(filteredTests);
+        }
+
+        function searchTests() {
+            // const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            // if (!searchTerm) {
+            //     filteredTests = [...availableTests];
+            // } else {
+            //     filteredTests = availableTests.filter(test => 
+            //         test.name.toLowerCase().includes(searchTerm) ||
+            //         test.id.toLowerCase().includes(searchTerm) ||
+            //         test.doctor.toLowerCase().includes(searchTerm)
+            //     );
+            // }
+            
+            // renderAvailableTests(filteredTests);
+            const searchTerm = document.getElementById('searchInput').value;
+            fetchAvailableTests(searchTerm);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function saveAndContinue() {
+            if (selectedTests.length === 0) {
+                alert('Vui lòng chọn ít nhất một xét nghiệm');
+                return;
+            }
+
+            // Save selected tests to localStorage
+    localStorage.setItem('selectedTests', JSON.stringify(selectedTests));
+
+
+
+            // Save selected tests to localStorage or pass back via URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientData = {
+                id: urlParams.get('id') || '',
+                name: urlParams.get('name') || '',
+                birthDate: urlParams.get('birthDate') || '',
+                gender: urlParams.get('gender') || '',
+                phone: urlParams.get('phone') || '',
+                address: urlParams.get('address') || '',
+                appointmentDate: urlParams.get('appointmentDate') || '',
+                selectedTests: JSON.stringify(selectedTests)
+            };
+
+            // Redirect back to Patient Profile with test data
+            const params = new URLSearchParams(patientData);
+            window.location.href = `PatientProfile.html?${params.toString()}`;
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchTests();
+            }
+        });
+
+        // Real-time search
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                searchTests();
+            }, 300);
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // renderAvailableTests(filteredTests);
+            // renderSelectedTests();
+            fetchAvailableTests(); // fetch all data when the page loads
+            renderSelectedTests();
+        });
+    </script>
+</body>
+</html>

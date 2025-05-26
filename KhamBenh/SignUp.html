@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create an Account</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px 0;
+        }
+
+        /* Background decorative elements */
+        .bg-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            transform: rotate(-45deg);
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -150px;
+            right: -150px;
+            transform: rotate(30deg);
+        }
+
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: -50px;
+            transform: translateY(-50%) rotate(60deg);
+        }
+
+        .shape-4 {
+            width: 250px;
+            height: 250px;
+            top: 20%;
+            right: -80px;
+            transform: rotate(-30deg);
+        }
+
+        /* SignUp container */
+        .signup-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .signup-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .signup-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .password-input {
+            position: relative;
+        }
+
+        .password-dots {
+            font-size: 18px;
+            letter-spacing: 4px;
+            color: #999;
+            cursor: text;
+        }
+
+        .sign-up-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .sign-up-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .sign-up-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .login-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .login-link:hover {
+            color: #764ba2;
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .signup-container {
+                margin: 20px;
+                padding: 30px;
+            }
+            
+            .shape {
+                display: none;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Create an Account</h1>
+            <p>Create a account to continue</p>
+        </div>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="fullname">Fullname</label>
+                <input 
+                    type="text" 
+                    id="fullname" 
+                    class="form-input" 
+                    placeholder="Fullname"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input 
+                    type="text" 
+                    id="address" 
+                    class="form-input" 
+                    placeholder="123 Street, London"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email address:</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input" 
+                    placeholder="esteban.schiller@gmail.com"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone number</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    class="form-input" 
+                    placeholder="0912345678"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-input">
+                    <div class="form-input password-dots" onclick="showPasswordInput(this)">••••••</div>
+                </div>
+            </div>
+
+            <button type="submit" class="sign-up-btn">Sign Up</button>
+        </form>
+
+        <div class="footer-text">
+            Already have an account? <a href="#" class="login-link" onclick="goToLogin()">Login</a>
+        </div>
+    </div>
+
+    <script>
+        function showPasswordInput(element) {
+            const input = document.createElement('input');
+            input.type = 'password';
+            input.className = 'form-input';
+            input.placeholder = 'Enter your password';
+            input.name = 'password';
+            input.required = true;
+            input.style.position = 'absolute';
+            input.style.top = '0';
+            input.style.left = '0';
+            input.style.width = '100%';
+            input.style.background = 'white';
+            
+            element.parentNode.style.position = 'relative';
+            element.parentNode.appendChild(input);
+            input.focus();
+            
+            input.addEventListener('blur', function() {
+                if (this.value === '') {
+                    this.remove();
+                }
+            });
+        }
+
+        function goToLogin() {
+            // Quay lại trang login
+            window.history.back();
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Lấy dữ liệu form
+            const formData = new FormData(this);
+            const fullname = document.getElementById('fullname').value;
+            const address = document.getElementById('address').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            
+            const passwordInput = document.querySelector('input[name="password"]');
+            const password = passwordInput ? passwordInput.value : '';
+            
+            if (!password) {
+                alert('Please enter your password');
+                return;
+            }
+            
+            // Validation cơ bản
+            if (!fullname || !address || !email || !phone) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Simulate account creation
+            alert('Account created successfully! Redirecting to login...');
+
+            try {
+        const response = await fetch('http://localhost:8080/svc-auth/register/customer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fullname: fullname,
+                address: address,
+                email: email,
+                phone: phone,
+                password: password
+            })
+        });
+
+        if (response.ok) {
+            alert('Account created successfully! Redirecting to login...');
+            setTimeout(() => {
+                window.history.back();
+            }, 1000);
+        } else {
+            const errorData = await response.json();
+            alert('Signup failed: ' + (errorData.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error during sign up:', error);
+        alert('An error occurred. Please try again later.');
+    }
+            
+            // Chuyển về trang login sau khi tạo tài khoản thành công
+            setTimeout(() => {
+                window.history.back();
+            }, 1000);
+        });
+
+        // Auto-focus vào field đầu tiên
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('fullname').focus();
+        });
+    </script>
+</body>
+</html>
