@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Payment Checkout</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .bill-container {
+        max-width: 600px;
+        margin: auto;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      h2 {
+        text-align: center;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: left;
+      }
+      .total-row {
+        font-weight: bold;
+      }
+      .paypal-btn {
+        text-align: center;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bill-container">
+      <h2>Appointment Payment Summary</h2>
+
+      <p>
+        <strong>Appointment ID:</strong> {{ appointment_id }}
+      </p>
+      <p>
+        <strong>Appointment Price:</strong> ${{ price }}
+      </p>
+
+      {% if test_results %}
+        <h3>Test Results</h3>
+        <table>
+          <tr>
+            <th>Test Name</th>
+            <th>Test Price</th>
+            <th>Status</th>
+          </tr>
+          {% for test in test_results %}
+            <tr>
+              <td>{{ test.test_type_details.name }}</td>
+              <td>${{ test.test_type_details.cost }}</td>
+              <td>{{ test.status }}</td>
+            </tr>
+          {% endfor %}
+          <tr class="total-row">
+            <td colspan="2">Total</td>
+            <td>${{ totalPrice }}</td>
+          </tr>
+        </table>
+      {% endif %}
+
+      <div class="paypal-btn">
+        {% comment %} <form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+          {{ form.render }}
+          <input type="submit" value="Pay Now" />
+        </form> {% endcomment %}
+        {{ form.render }}
+      </div>
+    </div>
+  </body>
+</html>

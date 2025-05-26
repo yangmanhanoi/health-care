@@ -17,7 +17,7 @@ WHITELIST_PATHS = [
     ('svc-auth', 'api/login'),
     ('svc-auth', 'api/register'),
     ('svc-doctor', 'get-doctor-info'),
-    ('svc-appointment', 'get-appointment-info')
+    ('svc-appointment', 'get-appointment-info'),
     ('svc-laboratory', 'api/testtypes'),
     ('svc-laboratory', 'api/')
 ]
