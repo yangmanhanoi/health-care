@@ -579,6 +579,31 @@ class ApiService {
       },
     });
   }
+
+  // Chatbot endpoints
+  async sendChatMessage(data: {
+    message: string;
+    step: number;
+    symptoms: number[];
+    model_type?: string;
+  }): Promise<{
+    response: string;
+    step: number;
+    symptoms: number[];
+    model_type: string;
+    question?: string;
+  }> {
+    return this.makeRequest<{
+      response: string;
+      step: number;
+      symptoms: number[];
+      model_type: string;
+      question?: string;
+    }>("/svc-chatbot/chat", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const apiService = new ApiService();

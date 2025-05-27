@@ -14,6 +14,11 @@ WHITELIST_PATHS = [
     ('GET', 'svc-doctor/api/schedule/availabilities/doctor'),
     ('GET', 'svc-doctor/api/info'),
 
+    # Chatbot service endpoints - public access
+    ('GET', 'svc-chatbot/'),
+    ('GET', 'svc-chatbot/health'),
+    ('POST', 'svc-chatbot/chat'),
+
     # Legacy entries (keeping for backward compatibility)
     ('svc-auth', 'api/login'),
     ('svc-auth', 'api/register'),

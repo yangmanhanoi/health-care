@@ -19,6 +19,7 @@ import {
   Stethoscope,
   TestTube,
   Pill,
+  Bot,
 } from "lucide-react";
 
 export const DashboardPage: React.FC = () => {
@@ -56,6 +57,10 @@ export const DashboardPage: React.FC = () => {
 
   const handlePrescriptionManagement = () => {
     navigate("/prescriptions");
+  };
+
+  const handleChatbot = () => {
+    navigate("/chatbot");
   };
 
   const isDoctor = user?.roles?.includes("DOCTOR");
@@ -141,6 +146,13 @@ export const DashboardPage: React.FC = () => {
               </Button>
             )}
             <Button
+              onClick={handleChatbot}
+              className="flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
+            >
+              <Bot className="w-4 h-4" />
+              <span>AI Health Assistant</span>
+            </Button>
+            <Button
               onClick={handleViewAppointments}
               variant="outline"
               className="flex items-center space-x-2"
@@ -205,6 +217,7 @@ export const DashboardPage: React.FC = () => {
                     <li>• Book appointments</li>
                     <li>• View medical records</li>
                     <li>• Manage prescriptions</li>
+                    <li>• Use AI health assistant</li>
                     <li>• Contact healthcare providers</li>
                   </>
                 )}
