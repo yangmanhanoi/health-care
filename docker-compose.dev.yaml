@@ -110,7 +110,7 @@ services:
       - POSTGRES_HOST=postgres_db
       - POSTGRES_PORT=5432
     command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-  
+
   service-payment:
     build:
       context: ./payment_service
@@ -128,17 +128,16 @@ services:
     environment:
       - NGROK_DOMAIN=ethical-coral-apparently.ngrok-free.app
     command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-  # service-chatbot:
-  #   build:
-  #     context: ./chatbot_service
-  #     dockerfile: Dockerfile
-  #   container_name: service-chatbot
-  #   depends_on:
-  #     - mysql
-  #   ports:
-  #     - "8004:8004"
-  #   networks:
-  #     - healthcare_net
+  service-chatbot:
+    build:
+      context: ./chatbot_service
+      dockerfile: Dockerfile
+    container_name: service-chatbot
+    ports:
+      - "8009:5000"
+    networks:
+      - healthcare_net
+    command: python main.py
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -157,8 +156,8 @@ services:
         condition: service_started
       service-pharmacy:
         condition: service_started
-      # service-chatbot:
-      #   condition: service_started
+      service-chatbot:
+        condition: service_started
     ports:
       - "8080:8080"
     networks:

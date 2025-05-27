@@ -6,6 +6,6 @@ SERVICES = {
     "svc-laboratory": "http://service-laboratory:8000",
     "svc-prescription": "http://service-prescription:8000",
     "svc-pharmacy": "http://service-pharmacy:8000",
-    # "svc-chatbot": "http://service-chatbot:5005"
+    "svc-chatbot": "http://service-chatbot:5000",
     "svc-patient": "http://service-patient:8004"
 }
