@@ -16,6 +16,7 @@ import { DoctorSchedulePage } from "./pages/DoctorSchedulePage";
 import { DoctorAppointmentsPage } from "./pages/DoctorAppointmentsPage";
 import { DoctorAppointmentDetailPage } from "./pages/DoctorAppointmentDetailPage";
 import { LabTestManagementPage } from "./pages/LabTestManagementPage";
+import { PrescriptionManagementPage } from "./pages/PrescriptionManagementPage";
 import { Toaster } from "./components/ui/sonner";
 
 // Protected Route Component
@@ -122,6 +123,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <LabTestManagementPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/prescriptions"
+        element={
+          <ProtectedRoute>
+            <PrescriptionManagementPage />
           </ProtectedRoute>
         }
       />

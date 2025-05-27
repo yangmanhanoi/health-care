@@ -42,6 +42,7 @@ export interface User {
   username: string;
   roles: string[];
   user_id?: number;
+  id?: number; // Alias for user_id for consistency
 }
 
 export interface AuthContextType {

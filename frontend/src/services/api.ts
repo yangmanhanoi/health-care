@@ -29,6 +29,14 @@ import type {
   UpdateTestResultRequest,
   AppointmentTestItemsResponse,
 } from "../types/laboratory";
+import type {
+  Medicine,
+  Prescription,
+  CreatePrescriptionRequest,
+  CreatePrescriptionResponse,
+  SearchMedicationsRequest,
+  MedicineSearchResult,
+} from "../types/prescription";
 
 const API_BASE_URL = "http://localhost:8080";
 
@@ -458,6 +466,113 @@ class ApiService {
 
   async getLabTestOrder(orderId: number, token: string): Promise<LabTestOrder> {
     return this.makeRequest<LabTestOrder>(`/svc-laboratory/api/${orderId}/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  // Prescription endpoints
+  async searchMedications(
+    params?: SearchMedicationsRequest,
+    token?: string
+  ): Promise<MedicineSearchResult[]> {
+    const searchParams = new URLSearchParams();
+    if (params?.query) searchParams.append("query", params.query);
+
+    const queryString = searchParams.toString();
+    const endpoint = `/svc-prescription/api/medications/search/${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return this.makeRequest<MedicineSearchResult[]>(endpoint, {
+      method: "GET",
+      headers,
+    });
+  }
+
+  async createPrescription(
+    data: CreatePrescriptionRequest,
+    token: string
+  ): Promise<CreatePrescriptionResponse> {
+    console.log(`Creating prescription for patient ID: ${data.patient_id}`, data);
+    try {
+      const result = await this.makeRequest<CreatePrescriptionResponse>("/svc-prescription/api/", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+      console.log(`Successfully created prescription:`, result);
+      return result;
+    } catch (error) {
+      console.error(`Error creating prescription:`, error);
+      throw error;
+    }
+  }
+
+  async getPatientPrescriptions(
+    patientId: number,
+    token: string
+  ): Promise<Prescription[]> {
+    console.log(`Fetching prescriptions for patient ID: ${patientId}`);
+    try {
+      const result = await this.makeRequest<Prescription[]>(
+        `/svc-prescription/api/patient/${patientId}/`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(`Successfully fetched ${result.length} prescriptions for patient ${patientId}`);
+      return result;
+    } catch (error) {
+      console.error(`Error fetching prescriptions for patient ${patientId}:`, error);
+      throw error;
+    }
+  }
+
+  async getDoctorPrescriptions(
+    doctorId: number,
+    token: string
+  ): Promise<Prescription[]> {
+    return this.makeRequest<Prescription[]>(
+      `/svc-prescription/api/doctor/${doctorId}/`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  }
+
+  async getPrescriptionDetail(
+    prescriptionId: number,
+    token: string
+  ): Promise<Prescription> {
+    return this.makeRequest<Prescription>(
+      `/svc-prescription/api/${prescriptionId}/`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  }
+
+  async getAllPrescriptions(token: string): Promise<Prescription[]> {
+    return this.makeRequest<Prescription[]>("/svc-prescription/api/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

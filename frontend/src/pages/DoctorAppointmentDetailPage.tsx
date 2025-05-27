@@ -11,8 +11,13 @@ import type {
   TestResult,
   AppointmentTestItemsResponse,
 } from "../types/laboratory";
+import type {
+  PrescriptionItem,
+  CreatePrescriptionRequest,
+} from "../types/prescription";
 import { LabTestSelection } from "../components/LabTestSelection";
 import { LabTestResultForm } from "../components/LabTestResultForm";
+import { PrescriptionForm } from "../components/PrescriptionForm";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -66,6 +71,10 @@ export const DoctorAppointmentDetailPage: React.FC = () => {
   const [diagnoseText, setDiagnoseText] = useState("");
   const [needLabTest, setNeedLabTest] = useState(false);
   const [conclusionText, setConclusionText] = useState("");
+
+  // Prescription states
+  const [prescriptionItems, setPrescriptionItems] = useState<PrescriptionItem[]>([]);
+  const [needPrescription, setNeedPrescription] = useState(false);
 
   // Lab test states
   const [selectedTests, setSelectedTests] = useState<TestType[]>([]);
@@ -212,14 +221,48 @@ export const DoctorAppointmentDetailPage: React.FC = () => {
       return;
     }
 
+    // If prescription is needed but no items added, show error
+    if (needPrescription && prescriptionItems.length === 0) {
+      toast.error("Please add medicines to the prescription or uncheck 'Create Prescription'.");
+      return;
+    }
+
     try {
       setActionLoading("conclude");
+
+      // Create prescription if needed
+      if (needPrescription && prescriptionItems.length > 0) {
+        const prescriptionData: CreatePrescriptionRequest = {
+          patient_id: appointment!.patient_id,
+          diagnose: diagnoseText || conclusionText.trim(),
+          items: prescriptionItems.map(item => ({
+            medication_id: item.medication_id,
+            medication_name: item.medication_name,
+            quantity: item.quantity,
+            dosage: item.dosage,
+            frequency: item.frequency,
+            duration: item.duration,
+            route: item.route,
+            note: item.note,
+          })),
+        };
+
+        await apiService.createPrescription(prescriptionData, token);
+        toast.success("Prescription created successfully!");
+      }
+
+      // Conclude the appointment
       await apiService.concludeAppointment(
         parseInt(appointmentId),
         conclusionText.trim(),
         token
       );
-      toast.success("Appointment concluded successfully!");
+
+      toast.success(
+        needPrescription && prescriptionItems.length > 0
+          ? "Appointment concluded and prescription created successfully!"
+          : "Appointment concluded successfully!"
+      );
       await loadAppointmentDetail(); // Reload to get updated status
     } catch (err: any) {
       toast.error(err.message || "Failed to conclude appointment.");
@@ -568,10 +611,10 @@ export const DoctorAppointmentDetailPage: React.FC = () => {
                     Conclusion
                   </CardTitle>
                   <CardDescription>
-                    Enter final conclusion to complete the appointment
+                    Enter final conclusion and create prescription if needed
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-2 block">
                       Conclusion
@@ -585,10 +628,39 @@ export const DoctorAppointmentDetailPage: React.FC = () => {
                     />
                   </div>
 
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="needPrescription"
+                      checked={needPrescription}
+                      onCheckedChange={(checked) =>
+                        setNeedPrescription(checked as boolean)
+                      }
+                    />
+                    <label
+                      htmlFor="needPrescription"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Create prescription for patient
+                    </label>
+                  </div>
+
+                  {/* Prescription Form */}
+                  {needPrescription && (
+                    <div className="border-t pt-6">
+                      <PrescriptionForm
+                        prescriptionItems={prescriptionItems}
+                        onItemsChange={setPrescriptionItems}
+                        disabled={actionLoading === "conclude"}
+                      />
+                    </div>
+                  )}
+
                   <Button
                     onClick={handleConclude}
                     disabled={
-                      actionLoading === "conclude" || !conclusionText.trim()
+                      actionLoading === "conclude" ||
+                      !conclusionText.trim() ||
+                      (needPrescription && prescriptionItems.length === 0)
                     }
                     className="w-full"
                     size="lg"
@@ -598,7 +670,9 @@ export const DoctorAppointmentDetailPage: React.FC = () => {
                     ) : (
                       <CheckCircle className="h-4 w-4 mr-2" />
                     )}
-                    Complete Appointment
+                    {needPrescription && prescriptionItems.length > 0
+                      ? "Complete Appointment & Create Prescription"
+                      : "Complete Appointment"}
                   </Button>
                 </CardContent>
               </Card>

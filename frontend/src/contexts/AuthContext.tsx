@@ -54,6 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         username: tokenPayload.username || credentials.username,
         roles: tokenPayload.roles || ["PATIENT"],
         user_id: tokenPayload.user_id,
+        id: tokenPayload.user_id, // Set both for consistency
       };
 
       setToken(response.access);

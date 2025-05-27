@@ -18,6 +18,7 @@ import {
   Clock,
   Stethoscope,
   TestTube,
+  Pill,
 } from "lucide-react";
 
 export const DashboardPage: React.FC = () => {
@@ -51,6 +52,10 @@ export const DashboardPage: React.FC = () => {
 
   const handleLabTestManagement = () => {
     navigate("/lab/tests");
+  };
+
+  const handlePrescriptionManagement = () => {
+    navigate("/prescriptions");
   };
 
   const isDoctor = user?.roles?.includes("DOCTOR");
@@ -91,13 +96,22 @@ export const DashboardPage: React.FC = () => {
           </h2>
           <div className="flex flex-wrap gap-4">
             {isPatient && (
-              <Button
-                onClick={handleBookAppointment}
-                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Book Appointment</span>
-              </Button>
+              <>
+                <Button
+                  onClick={handleBookAppointment}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Book Appointment</span>
+                </Button>
+                <Button
+                  onClick={handlePrescriptionManagement}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                >
+                  <Pill className="w-4 h-4" />
+                  <span>My Prescriptions</span>
+                </Button>
+              </>
             )}
             {isDoctor && (
               <>
