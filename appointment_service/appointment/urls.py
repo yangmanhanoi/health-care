@@ -12,4 +12,15 @@ urlpatterns = [
     # Doctor endpoints
     path('doctor', doctor_appointment_list, name='doctor-appointment-list'),
     path('doctor/<int:appointment_id>', doctor_appointment_detail, name='doctor-appointment-detail'),
+
+    # New API endpoints for calling doctor and patient services
+    path('doctor-info/<int:doctor_id>', get_doctor_info, name='get-doctor-info'),
+    path('patient-info/<int:patient_id>', get_patient_info, name='get-patient-info'),
+    path('<int:appointment_id>/full-details', get_appointment_full_details, name='get-appointment-full-details'),
+    path('search-doctors', search_doctors, name='search-doctors'),
+    path('patient-history/<int:patient_id>', get_patient_history, name='get-patient-history'),
+    path('all-enriched', get_all_appointments_enriched, name='get-all-appointments-enriched'),
+
+    # Test endpoint
+    path('test-patient-service', test_patient_service, name='test-patient-service'),
 ]

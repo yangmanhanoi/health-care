@@ -1,4 +1,23 @@
 services:
+  service-user:
+    build:
+      context: ./user_service
+      dockerfile: Dockerfile.dev
+    container_name: service-user
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8010:8001"
+    networks:
+      - healthcare_net
+    environment:
+      - POSTGRES_DB=user_service_db
+      - POSTGRES_USER=namdt25
+      - POSTGRES_PASSWORD=namdt25
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_PORT=5432
+    command: sh -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
   service-auth:
     build:
       context: ./auth_service
